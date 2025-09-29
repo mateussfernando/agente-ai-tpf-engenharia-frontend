@@ -34,7 +34,9 @@ export default function LoginPage() {
           Esqueceu a senha?
         </a>
       </div>
-      <AuthButton onClick={() => alert("Login clicked!")}>Entrar</AuthButton>
+      <AuthButton onClick={() => (window.location.href = "/chat")}>
+        Entrar
+      </AuthButton>
       {/* Register link */}
       <p className="text-gray-400 text-sm text-center mt-6">
         Não possui cadastro?{" "}

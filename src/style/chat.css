@@ -1,0 +1,126 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.chat-container {
+  display: flex;
+  height: 100vh;
+}
+/* sidebar */
+.sidebar {
+  width: 250px;
+  background: #ffffff;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+h4{
+  color: #000000;
+}
+.logo {
+  color: #0033aa;
+  font-weight: 500;
+  font-size: 30px;
+  padding: 10px;
+}
+.logo span {
+  color: #00c4ff;
+  
+}
+.new-chat {
+  background: #003ece;
+  color: white;
+  border: none;
+  padding: 0.6rem;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+.new-chat:hover {
+  background: #0055ff;
+  transform: scale(1.05);
+}
+
+.user-profile {
+  margin-top: auto;
+  padding: 1rem;
+  background: #ddd;
+  border-radius: 6px;
+}
+/* sidebar */
+.chat-main {
+  flex: 1;
+  background: #123a7d;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1rem;
+}
+
+.chat-input {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  background-color: white; 
+  border-radius: 8px;
+  position: relative;
+  z-index: 10;
+}
+.chat-input input {
+  flex: 1;
+  color: #000000;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  padding: 10px;
+  background: white;
+}
+
+.add-file-btn {
+  background: #0033aa;
+  border: none;
+  color: #ffffff; 
+  font-size: 22px;
+  cursor: pointer;
+  margin-left: 10px;
+  align-items: center;
+  border-radius: 50%;
+  padding: 9px 9px;
+  transition: color 0.2s ease-in-out;
+}
+
+.add-file-btn:hover {
+  color: #585858;
+}
+.send-btn {
+  background: none;
+  color: #0033aa;
+  font-size: 20px;
+  border: none;
+  padding: 0 1rem;
+  border-radius: 0 6px 6px 0;
+  cursor: pointer;
+}
+.user-profile {
+  position: relative; 
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  color: #000000;
+  background-color: #ffffff;
+  border-radius: 8px;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.user-profile:hover {
+  background-color: #123a7d;
+}
+
+.user-icon-container {
+  font-size: 24px;
+  margin-right: 12px;
+}

@@ -1,7 +1,9 @@
 // app/page.js
 import { redirect } from "next/navigation";
 
-export default function ChatPage() {
+export default function HomePage() {
+  redirect("/auth/login");
 
-  redirect("/chat"); 
+  // Este código não será executado
+  return null;
 }

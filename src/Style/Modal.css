@@ -1,0 +1,43 @@
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.modal {
+  background: #294781;
+  padding: 2rem;
+  color: #000000;
+  border-radius: 6px;
+  width: 400px;
+}
+
+.modal-animate {
+  animation: scaleIn 0.3s ease forwards;
+}
+
+.modal-actions, p{
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.modal-actions button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modal-actions .confirm {
+  background: red;
+  color: white;
+}

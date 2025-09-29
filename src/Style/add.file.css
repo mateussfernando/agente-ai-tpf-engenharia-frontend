@@ -1,0 +1,57 @@
+.add-file-modal {
+  width: 400px; 
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.close-modal-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6a6a6a;
+}
+
+.close-modal-btn:hover {
+  color: #333;
+}
+
+.modal-content {
+  margin-bottom: 20px;
+}
+
+.file-upload-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #1a4d8b;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.file-upload-label:hover {
+  background-color: #123a7d;
+}
+
+.upload-icon {
+  margin-right: 8px;
+  font-size: 20px;
+}

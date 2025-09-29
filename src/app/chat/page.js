@@ -99,9 +99,9 @@ export default function ChatPage() {
     <div className="chat-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <h2 className="logo">
+        <h1 className="logo">
           TPF<span>-AI</span>
-        </h2>
+        </h1>
         <button
           className="new-chat"
           onClick={async () => {

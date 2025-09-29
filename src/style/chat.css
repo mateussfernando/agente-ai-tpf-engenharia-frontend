@@ -15,9 +15,21 @@ body {
   display: flex;
   flex-direction: column;
 }
-
+h4{
+  color: #000000;
+}
+.logo {
+  color: #0033aa;
+  font-weight: 500;
+  font-size: 30px;
+  padding: 10px;
+}
+.logo span {
+  color: #00c4ff;
+  
+}
 .new-chat {
-  background: #0033aa;
+  background: #003ece;
   color: white;
   border: none;
   padding: 0.6rem;
@@ -59,6 +71,7 @@ body {
 }
 .chat-input input {
   flex: 1;
+  color: #000000;
   border: none;
   outline: none;
   font-size: 16px;
@@ -75,7 +88,7 @@ body {
   margin-left: 10px;
   align-items: center;
   border-radius: 50%;
-  padding: 7px 10px;
+  padding: 9px 9px;
   transition: color 0.2s ease-in-out;
 }
 
@@ -84,6 +97,7 @@ body {
 }
 .send-btn {
   background: none;
+  color: #0033aa;
   font-size: 20px;
   border: none;
   padding: 0 1rem;
@@ -95,6 +109,7 @@ body {
   display: flex;
   align-items: center;
   padding: 12px;
+  color: #000000;
   background-color: #ffffff;
   border-radius: 8px;
   margin-top: 20px;

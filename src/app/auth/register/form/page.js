@@ -114,12 +114,17 @@ export default function Form() {
       <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
         <div>
           <Input
-            name="name"
+            name="Nome"
             type="text"
             placeholder="Digite seu nome completo"
             icon={<FiUser className="text-black/25" size={18} />}
             value={formData.name}
-            onChange={handleInputChange}
+            onChange={(e) =>
+              handleInputChange({
+                ...e,
+                target: { ...e.target, name: "name" },
+              })
+            }
           />
           {errors.name && (
             <p className="text-red-500 text-sm mt-1">{errors.name}</p>
@@ -128,12 +133,17 @@ export default function Form() {
 
         <div>
           <Input
-            name="email"
+            name="E-mail"
             type="email"
             placeholder="Digite o seu email"
             icon={<FiMail className="text-black/25" size={18} />}
             value={formData.email}
-            onChange={handleInputChange}
+            onChange={(e) =>
+              handleInputChange({
+                ...e,
+                target: { ...e.target, name: "email" },
+              })
+            }
           />
           {errors.email && (
             <p className="text-red-500 text-sm mt-1">{errors.email}</p>

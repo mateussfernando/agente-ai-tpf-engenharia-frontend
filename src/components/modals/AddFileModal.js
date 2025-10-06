@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { MdOutlineClose, MdDriveFolderUpload, MdDescription } from "react-icons/md";
-import { api } from "../api/Api";
-import "../style/add-file.css";
+import React, { useState, useRef } from "react";
+import { FiUpload, FiX, FiCheck } from "react-icons/fi";
+import { api } from "../../api/Api";
+import "../../style/add-file.css";
 
-export default function AddFileModal({ onFileUploaded, onClose, activeConversation }) {
+export default function AddFileModal({
+  onFileUploaded,
+  onClose,
+  activeConversation,
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [templates, setTemplates] = useState([]);
@@ -50,12 +54,11 @@ export default function AddFileModal({ onFileUploaded, onClose, activeConversati
       setUploadedFile({
         id: documentId,
         name: file.name,
-        file: file
+        file: file,
       });
 
       // Avançar para seleção de template
       setCurrentStep(2);
-
     } catch (err) {
       console.error("Erro no upload do arquivo:", err);
       setError(err.message || "Erro ao enviar arquivo.");
@@ -75,12 +78,12 @@ export default function AddFileModal({ onFileUploaded, onClose, activeConversati
     if (!uploadedFile) return;
 
     try {
-      // Aqui você envia tanto o documento quanto o template 
+      // Aqui você envia tanto o documento quanto o template
       const processingData = {
         documentId: uploadedFile.id,
         templateId: template._id,
         fileName: uploadedFile.name,
-        templateName: template.name
+        templateName: template.name,
       };
 
       console.log("Processando:", processingData);
@@ -91,7 +94,6 @@ export default function AddFileModal({ onFileUploaded, onClose, activeConversati
       }
 
       onClose();
-
     } catch (err) {
       console.error("Erro ao processar:", err);
       setError("Erro ao selecionar template.");
@@ -119,12 +121,12 @@ export default function AddFileModal({ onFileUploaded, onClose, activeConversati
 
         <div className="modal-steps">
           <div className="step-indicator">
-            <div className={`step ${currentStep >= 1 ? 'active' : ''}`}>
+            <div className={`step ${currentStep >= 1 ? "active" : ""}`}>
               <span>1</span>
               Upload
             </div>
             <div className="step-connector"></div>
-            <div className={`step ${currentStep >= 2 ? 'active' : ''}`}>
+            <div className={`step ${currentStep >= 2 ? "active" : ""}`}>
               <span>2</span>
               Template
             </div>
@@ -138,10 +140,13 @@ export default function AddFileModal({ onFileUploaded, onClose, activeConversati
           {currentStep === 1 && (
             <div className="upload-section">
               <p className="modal-description">
-                Faça upload do arquivo que você deseja processar (DOC, DOCX, XLSX, etc.)
+                Faça upload do arquivo que você deseja processar (DOC, DOCX,
+                XLSX, etc.)
               </p>
 
-              <label className={`file-upload-label ${isLoading ? "disabled" : ""}`}>
+              <label
+                className={`file-upload-label ${isLoading ? "disabled" : ""}`}
+              >
                 <MdDriveFolderUpload className="upload-icon" />
                 <span>{isLoading ? "Enviando..." : "Escolher Arquivo"}</span>
                 <input
@@ -154,7 +159,9 @@ export default function AddFileModal({ onFileUploaded, onClose, activeConversati
               </label>
 
               <div className="supported-formats">
-                <small>Formatos suportados: DOC, DOCX, XLSX, XLS, PDF, TXT</small>
+                <small>
+                  Formatos suportados: DOC, DOCX, XLSX, XLS, PDF, TXT
+                </small>
               </div>
             </div>
           )}
@@ -166,7 +173,9 @@ export default function AddFileModal({ onFileUploaded, onClose, activeConversati
                 <MdDescription className="file-icon" />
                 <div className="file-details">
                   <span className="file-name">{uploadedFile.name}</span>
-                  <span className="file-status">✓ Arquivo enviado com sucesso</span>
+                  <span className="file-status">
+                    ✓ Arquivo enviado com sucesso
+                  </span>
                 </div>
                 <button className="change-file-btn" onClick={goBackToUpload}>
                   Alterar
@@ -183,17 +192,17 @@ export default function AddFileModal({ onFileUploaded, onClose, activeConversati
                 </div>
               ) : (
                 <div className="templates-list">
-                  {templates.map(template => (
+                  {templates.map((template) => (
                     <div
                       key={template._id}
-                      className={`template_name ${selectedTemplate?._id === template._id ? "selected" : ""}`}
+                      className={`template_name ${
+                        selectedTemplate?._id === template._id ? "selected" : ""
+                      }`}
                       onClick={() => handleTemplateSelect(template)}
                     >
                       <MdDescription className="template-icon" />
                       <div className="template-info">
-                        <span className="template-name">
-                          {template.name}
-                        </span>
+                        <span className="template-name">{template.name}</span>
                         {template.description && (
                           <span className="template-description">
                             {template.description}
@@ -207,7 +216,10 @@ export default function AddFileModal({ onFileUploaded, onClose, activeConversati
                     <div className="no-templates">
                       <MdDescription className="no-templates-icon" />
                       <p>Nenhum template disponível</p>
-                      <small>Entre em contato com o administrador para adicionar templates.</small>
+                      <small>
+                        Entre em contato com o administrador para adicionar
+                        templates.
+                      </small>
                     </div>
                   )}
                 </div>

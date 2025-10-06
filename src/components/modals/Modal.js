@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import "../style/modal.css";
+import "../../style/modal.css";
 
 export default function Modal({ type, chatTitle, onClose, onConfirm }) {
   const [newTitle, setNewTitle] = useState(chatTitle || "");
@@ -25,8 +25,12 @@ export default function Modal({ type, chatTitle, onClose, onConfirm }) {
   return (
     <div className="modal-overlay">
       <div className="modal modal-animate" role="dialog" aria-modal="true">
-        {isDelete && <p>Deseja realmente excluir o chat "{chatTitle}" ? Essa ação é irreversível e as mensagens
-              desse chat serão apagadas</p>}
+        {isDelete && (
+          <p>
+            Deseja realmente excluir o chat "{chatTitle}" ? Essa ação é
+            irreversível e as mensagens desse chat serão apagadas
+          </p>
+        )}
         {isRename && (
           <>
             <p>Renomear chat:</p>
@@ -41,14 +45,15 @@ export default function Modal({ type, chatTitle, onClose, onConfirm }) {
           </>
         )}
         <div className="modal-actions">
-          <button className="cancelar" onClick={onClose}>Cancelar</button>
-        <button
-          className="confirm"
-          onClick={() => onConfirm(isRename ? newTitle.trim() : undefined)}
-        >
-          {isDelete ? "Confirmar Exclusão" : "Salvar Novo Nome"}
-        </button>
-
+          <button className="cancelar" onClick={onClose}>
+            Cancelar
+          </button>
+          <button
+            className="confirm"
+            onClick={() => onConfirm(isRename ? newTitle.trim() : undefined)}
+          >
+            {isDelete ? "Confirmar Exclusão" : "Salvar Novo Nome"}
+          </button>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { FiEdit, FiTrash2 } from "react-icons/fi";
-import "../style/side-bar-Item.css";
+import { FiMoreVertical, FiEdit, FiTrash2 } from "react-icons/fi";
+import "../../style/side-bar-Item.css";
 
 export default function SidebarItem({
   conversation,
@@ -20,8 +20,8 @@ export default function SidebarItem({
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setPosition({
-        top: rect.top + window.scrollY,   // posição no documento
-        left: rect.right + 12,            // à direita da sidebar
+        top: rect.top + window.scrollY, // posição no documento
+        left: rect.right + 12, // à direita da sidebar
       });
     }
     setShowMenu(true);

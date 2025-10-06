@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import SidebarItem from "../../components/SidebarItem";
-import Modal from "../../components/Modal";
-import DocumentLink from "../../components/DocumentLink";
-import AddFileModal from "../../components/AddFileModal";
-import MenuPerfil from "../../components/MenuPerfil";
-import InputChat from "../../components/InputChat";
+import SidebarItem from "../../components/chat/SidebarItem";
+import Modal from "../../components/modals/Modal";
+import DocumentLink from "../../components/chat/DocumentLink";
+import AddFileModal from "../../components/modals/AddFileModal";
+import MenuPerfil from "../../components/layout/MenuPerfil";
+import InputChat from "../../components/chat/InputChat";
 import { FaUserCircle } from "react-icons/fa";
 import { api } from "../../api/Api";
 import "../../style/chat.css";

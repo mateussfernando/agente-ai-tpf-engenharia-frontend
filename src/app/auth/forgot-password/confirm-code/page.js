@@ -1,6 +1,6 @@
 "use client";
-import AuthLayout from "@/components/AuthLayout.js";
-import AuthButton from "@/components/AuthButton.js";
+import AuthLayout from "@/components/layout/AuthLayout.js";
+import AuthButton from "@/components/ui/AuthButton.js";
 import AuthSubtitle from "@/components/AuthSubtitle.js";
 
 export default function ConfirmCode() {

@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
-import AuthLayout from "@/components/AuthLayout.js";
-import Input from "../../../components/Input.js";
-import AuthButton from "@/components/AuthButton.js";
-import AuthSubtitle from "@/components/AuthSubtitle.js";
-import AlertBox from "@/components/AlertBox.js";
+import AuthLayout from "@/components/layout/AuthLayout.js";
+import Input from "../../../components/ui/Input.js";
+import AuthButton from "@/components/ui/AuthButton.js";
+import AuthSubtitle from "@/components/ui/AuthSubtitle.js";
+import AlertBox from "@/components/modals/AlertBox.js";
 import { FiUser, FiLock } from "react-icons/fi";
 import { api } from "../../../api/Api.js";
 

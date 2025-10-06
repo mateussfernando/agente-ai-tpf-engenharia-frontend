@@ -1,9 +1,9 @@
 // Aqui onde funciona boa parte da logica, enivar a mensagem, o arqui e o template
 import React, { useState } from "react";
 import { FiSend, FiPlus } from "react-icons/fi";
-import { api } from "../api/Api";
-import File from "../components/File";
-import "../style/chat.css";
+import { api } from "../../api/Api";
+import File from "./File";
+import "../../style/chat.css";
 
 export default function InputChat({
   activeConversation,

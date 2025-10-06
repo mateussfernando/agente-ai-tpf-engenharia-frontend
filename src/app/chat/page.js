@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import SidebarItem from "../../components/SidebarItem";
 import Modal from "../../components/Modal";
+import DocumentLink from "../../components/DocumentLink";
 import AddFileModal from "../../components/AddFileModal";
 import MenuPerfil from "../../components/MenuPerfil";
 import InputChat from "../../components/InputChat";
@@ -10,8 +11,8 @@ import { api } from "../../api/Api";
 import "../../style/chat.css";
 
 export default function ChatPage() {
-  const [chats, setChats] = useState([]);
-  const [activeChat, setActiveChat] = useState(null);
+  const [conversations, setConversations] = useState([]);
+  const [activeConversation, setActiveConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [user, setUser] = useState({
     name: "Carregando...",
@@ -21,78 +22,111 @@ export default function ChatPage() {
   const [showMenuPerfil, setShowMenuPerfil] = useState(false);
   const [showAddFileModal, setShowAddFileModal] = useState(false);
 
+  // Estados para gerenciar os anexos
+  const [attachedDocumentId, setAttachedDocumentId] = useState(null);
+  const [attachedFileName, setAttachedFileName] = useState(null);
+  const [attachedTemplateId, setAttachedTemplateId] = useState(null); // ← ESTADO ADICIONADO
+
   const chatContainerRef = useRef(null);
 
+  // Carrega conversas e usuário ao abrir
   useEffect(() => {
     const load = async () => {
       try {
-        const [chatsData, userData] = await Promise.all([
-          api.getChats(),
-          api.getUser(),
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const [convData, userData] = await Promise.all([
+          api.getConversations(),
+          api.getProfile(),
         ]);
-        setChats(chatsData);
+
+        setConversations(convData);
         setUser({ name: userData.name, email: userData.email });
-        if (chatsData.length) {
-          selectChat(chatsData[0]);
-        } else {
-          const newChat = await api.createChat();
-          setChats([newChat]);
-          selectChat(newChat);
+
+        if (convData.length) selectConversation(convData[0]);
+        else {
+          const newConvData = await api.sendMessage("Olá, TPF-AI!");
+          setConversations((prev) => [newConvData.conversation, ...prev]);
+          selectConversation(newConvData.conversation);
         }
       } catch (err) {
-        console.error(err);
+        console.error("Erro ao carregar chat:", err.message);
       }
     };
     load();
   }, []);
 
   useEffect(() => {
-    if (chatContainerRef.current) {
+    if (chatContainerRef.current)
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
-    }
   }, [messages]);
 
-  const selectChat = async (chat) => {
-    setActiveChat(chat);
+  const selectConversation = async (conversation) => {
+    setActiveConversation(conversation);
+    setAttachedDocumentId(null);
+    setAttachedFileName(null);
+    setAttachedTemplateId(null);
     try {
-      const history = await api.getChatMessages(chat.id);
-      setMessages(history);
+      const history = await api.getConversationHistory(
+        conversation._id || conversation.id
+      );
+      setMessages(history || []);
     } catch {
       setMessages([]);
     }
   };
 
-  const handleRenameChat = (chatId, newTitle) => {
-    api
-      .renameChat(chatId, newTitle)
-      .then(() => {
-        setChats((prev) =>
-          prev.map((c) => (c.id === chatId ? { ...c, title: newTitle } : c))
-        );
-        closeModal();
-      })
-      .catch((err) => alert(err.message));
+  // Funções de renomear e excluir
+  const handleRenameConversation = async (conversationId, newTitle) => {
+    if (!conversationId || !newTitle) return alert("Título obrigatório");
+
+    try {
+      await api.renameConversation(conversationId, newTitle);
+      setConversations((prev) =>
+        prev.map((c) =>
+          c._id === conversationId ? { ...c, title: newTitle } : c
+        )
+      );
+      closeModal();
+    } catch (err) {
+      alert("Erro ao renomear: " + err.message);
+    }
   };
 
-  const handleDeleteChat = (chatId) => {
-    api
-      .deleteChat(chatId)
-      .then(() => {
-        setChats((prev) => prev.filter((c) => c.id !== chatId));
-        closeModal();
-        setActiveChat(chats[0] || null);
-      })
-      .catch((err) => alert(err.message));
-  };
+  const handleDeleteConversation = async (conversationId) => {
+    if (!conversationId) return alert("ID da conversa não encontrado");
 
-  const closeModal = () => setModal(null);
+    try {
+      await api.deleteConversation(conversationId);
+      const newConversations = conversations.filter(
+        (c) => c._id !== conversationId
+      );
+      setConversations(newConversations);
+
+      if (activeConversation && activeConversation._id === conversationId) {
+        selectConversation(newConversations[0] || null);
+      }
+      closeModal();
+    } catch (err) {
+      alert("Erro ao excluir: " + err.message);
+    }
+  };
 
   const handleNewMessage = (msg) => setMessages((prev) => [...prev, msg]);
+  const closeModal = () => setModal(null);
+  const onLogout = () => (window.location.href = "/auth/login");
 
-  const onLogout = () => {
-    // Implementar logout
-    window.location.href = "/auth/login";
+  const handleFileUploaded = (documentId, fileName, templateId) => {
+    setAttachedDocumentId(documentId);
+    setAttachedFileName(fileName);
+    setAttachedTemplateId(templateId);
+    setShowAddFileModal(false);
+
+    alert(
+      `Arquivo "${fileName}" e template selecionado! Digite suas instruções.`
+    );
   };
 
   return (
@@ -102,33 +136,65 @@ export default function ChatPage() {
         <h1 className="logo">
           TPF<span>-AI</span>
         </h1>
+
         <button
           className="new-chat"
           onClick={async () => {
-            const newChat = await api.createChat();
-            setChats((prev) => [...prev, newChat]);
-            selectChat(newChat);
+            try {
+              setActiveConversation(null);
+              setMessages([]);
+              setAttachedDocumentId(null);
+              setAttachedFileName(null);
+              setAttachedTemplateId(null);
+
+              const apiResponse = await api.sendMessage("Novo chat iniciado");
+
+              if (!apiResponse || !apiResponse.conversation_id) {
+                throw new Error("API não retornou o ID da nova conversa.");
+              }
+              const newConvList = await api.getConversations();
+              const newConversation =
+                newConvList.find(
+                  (c) => c._id === apiResponse.conversation_id
+                ) || newConvList[0];
+
+              if (!newConversation) {
+                throw new Error(
+                  "Falha ao recuperar os dados da nova conversa."
+                );
+              }
+
+              setConversations(newConvList);
+              selectConversation(newConversation);
+            } catch (err) {
+              console.error("Erro ao criar novo chat:", err.message);
+            }
           }}
         >
           + Novo Chat
         </button>
 
         <h4>Histórico</h4>
-        {chats.map((chat) => (
-          <SidebarItem
-            key={chat.id}
-            chatId={chat.id}
-            text={chat.title || "Chat sem nome"}
-            onRename={(id, title) =>
-              setModal({ type: "renomear", chat: { id, title } })
-            }
-            onDelete={(id, title) =>
-              setModal({ type: "excluir", chat: { id, title } })
-            }
-            onSelect={selectChat}
-            isActive={activeChat?.id === chat.id}
-          />
-        ))}
+        <div className="chat-list">
+          {conversations
+            .filter((conv) => conv && conv._id)
+            .map((conv) => (
+              <SidebarItem
+                key={conv._id}
+                conversation={conv}
+                onRename={(conversation) =>
+                  setModal({ type: "renomear", chat: conversation })
+                }
+                onDelete={(conversation) =>
+                  setModal({ type: "excluir", chat: conversation })
+                }
+                onSelect={selectConversation}
+                isActive={
+                  activeConversation && activeConversation._id === conv._id
+                }
+              />
+            ))}
+        </div>
 
         <div
           className="user-profile"
@@ -149,33 +215,40 @@ export default function ChatPage() {
         <div className="chat-messages" ref={chatContainerRef}>
           {messages.map((msg) => (
             <div
-              key={msg.id}
+              key={msg._id || msg.id}
               className={`message-bubble ${
-                msg.sender === "user" ? "user" : "bot"
+                msg.role === "user" || msg.sender === "user" ? "user" : "bot"
               }`}
             >
-              {msg.text}
+              {msg.content}
+              {msg.document_id && <DocumentLink documentId={msg.document_id} />}
             </div>
           ))}
         </div>
 
         <InputChat
-          activeChat={activeChat}
+          activeConversation={activeConversation}
           onMessageSent={handleNewMessage}
           onOpenAddFileModal={() => setShowAddFileModal(true)}
+          attachedDocumentId={attachedDocumentId}
+          setAttachedDocumentId={setAttachedDocumentId}
+          attachedFileName={attachedFileName}
+          setAttachedFileName={setAttachedFileName}
+          attachedTemplateId={attachedTemplateId}
+          setAttachedTemplateId={setAttachedTemplateId}
         />
       </main>
 
       {/* Modais */}
-      {modal && (
+      {modal && modal.chat && (
         <Modal
           type={modal.type}
           chatTitle={modal.chat.title}
           onClose={closeModal}
           onConfirm={
             modal.type === "renomear"
-              ? (newTitle) => handleRenameChat(modal.chat.id, newTitle)
-              : () => handleDeleteChat(modal.chat.id)
+              ? (newTitle) => handleRenameConversation(modal.chat._id, newTitle)
+              : () => handleDeleteConversation(modal.chat._id)
           }
         />
       )}
@@ -183,7 +256,8 @@ export default function ChatPage() {
       {showAddFileModal && (
         <AddFileModal
           onClose={() => setShowAddFileModal(false)}
-          activeChat={activeChat}
+          activeConversation={activeConversation}
+          onFileUploaded={handleFileUploaded}
         />
       )}
     </div>

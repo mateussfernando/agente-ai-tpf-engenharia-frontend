@@ -116,7 +116,6 @@ export default function ChatPage() {
 
   const handleNewMessage = (msg) => setMessages((prev) => [...prev, msg]);
   const closeModal = () => setModal(null);
-  const onLogout = () => (window.location.href = "/auth/login");
 
   const handleFileUploaded = (documentId, fileName, templateId) => {
     setAttachedDocumentId(documentId);
@@ -204,9 +203,7 @@ export default function ChatPage() {
             <FaUserCircle size={32} color="#000000ff" />
           </div>
           <span>{user.name}</span>
-          {showMenuPerfil && (
-            <MenuPerfil onLogout={onLogout} userEmail={user.email} />
-          )}
+          {showMenuPerfil && <MenuPerfil userEmail={user.email} />}
         </div>
       </aside>
 

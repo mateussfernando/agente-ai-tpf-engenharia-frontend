@@ -88,9 +88,20 @@ export default function Form() {
       router.push("/auth/register/success");
     } catch (error) {
       console.error("Erro no registro:", error);
-      setErrors({
-        submit: error.message || "Erro ao criar conta. Tente novamente.",
-      });
+
+      // Verificar se é erro de email já em uso
+      if (
+        error.message.includes("409") ||
+        error.message.includes("já está em uso")
+      ) {
+        setErrors({
+          email: "Este email já está em uso. Tente outro email ou faça login.",
+        });
+      } else {
+        setErrors({
+          submit: error.message || "Erro ao criar conta. Tente novamente.",
+        });
+      }
     } finally {
       setIsLoading(false);
     }

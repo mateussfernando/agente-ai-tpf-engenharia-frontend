@@ -19,7 +19,7 @@ export default function Form() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (e) => {
+  function handleInputChange(e) {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -33,9 +33,9 @@ export default function Form() {
         [name]: "",
       }));
     }
-  };
+  }
 
-  const validateForm = () => {
+  function validateForm() {
     const newErrors = {};
 
     // Validar nome
@@ -71,9 +71,9 @@ export default function Form() {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -94,7 +94,7 @@ export default function Form() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   return (
     <AuthLayout>
@@ -131,12 +131,17 @@ export default function Form() {
 
         <div>
           <Input
-            name="password"
+            name="Senha"
             placeholder="Digite sua senha"
             icon={<FiLock className="text-black/25" size={18} />}
             showPasswordToggle={true}
             value={formData.password}
-            onChange={handleInputChange}
+            onChange={(e) =>
+              handleInputChange({
+                ...e,
+                target: { ...e.target, name: "password" },
+              })
+            }
           />
           {errors.password && (
             <p className="text-red-500 text-sm mt-1">{errors.password}</p>
@@ -145,12 +150,17 @@ export default function Form() {
 
         <div>
           <Input
-            name="confirmPassword"
+            name="Confirmar senha"
             placeholder="Confirme sua senha"
             icon={<FiLock className="text-black/25" size={18} />}
             showPasswordToggle={true}
             value={formData.confirmPassword}
-            onChange={handleInputChange}
+            onChange={(e) =>
+              handleInputChange({
+                ...e,
+                target: { ...e.target, name: "confirmPassword" },
+              })
+            }
           />
           {errors.confirmPassword && (
             <p className="text-red-500 text-sm mt-1">

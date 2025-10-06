@@ -3,9 +3,9 @@ import { api } from "../../api/Api";
 import "../../style/menu-perfil.css";
 
 export default function MenuPerfil({ userEmail }) {
-  const handleLogout = () => {
+  function handleLogout() {
     api.logout();
-  };
+  }
 
   return (
     <div className="profile-menu">

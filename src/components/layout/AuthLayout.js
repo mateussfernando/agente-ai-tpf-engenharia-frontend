@@ -2,7 +2,7 @@
 import React from "react";
 import Image from "next/image";
 
-const AuthLayout = ({ children }) => {
+export default function AuthLayout({ children }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-500 to-indigo-800 flex items-center justify-center">
       <div className="w-[480px] min-h-[300px] h-auto bg-white rounded-lg shadow-lg p-6 flex flex-col">
@@ -22,6 +22,4 @@ const AuthLayout = ({ children }) => {
       </div>
     </div>
   );
-};
-
-export default AuthLayout;
+}

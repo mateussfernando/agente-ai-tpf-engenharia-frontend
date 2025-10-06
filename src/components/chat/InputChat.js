@@ -82,30 +82,30 @@ export default function InputChat({
     }
   };
 
-  const handleRemoveAttachment = () => {
+  function handleRemoveAttachment() {
     setAttachedDocumentId(null);
     setAttachedFileName(null);
     setAttachedTemplateId(null);
-  };
+  }
 
-  const handleRemoveTemplateOnly = () => {
+  function handleRemoveTemplateOnly() {
     setAttachedTemplateId(null);
-  };
+  }
 
-  const handleKeyDown = (e) => {
+  function handleKeyDown(e) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
-  };
+  }
 
-  const getPlaceholderText = () => {
+  function getPlaceholderText() {
     if (attachedDocumentId && attachedTemplateId)
       return "Digite instruções para processar o arquivo com o template...";
     if (attachedDocumentId) return "Digite suas instruções para o documento...";
     if (isSending) return "Aguardando resposta...";
     return "Digite sua mensagem...";
-  };
+  }
 
   return (
     <div className="chat-input-container">

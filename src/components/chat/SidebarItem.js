@@ -15,7 +15,7 @@ export default function SidebarItem({
   const buttonRef = useRef(null); // referência do botão "⋮"
   const menuRef = useRef(null); // referência do dropdown (portal)
 
-  const openMenu = (e) => {
+  function openMenu(e) {
     e.stopPropagation();
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
@@ -25,34 +25,36 @@ export default function SidebarItem({
       });
     }
     setShowMenu(true);
-  };
+  }
 
-  const closeMenu = () => setShowMenu(false);
+  function closeMenu() {
+    setShowMenu(false);
+  }
 
-  const toggleMenu = (e) => {
+  function toggleMenu(e) {
     e.stopPropagation();
     if (showMenu) closeMenu();
     else openMenu(e);
-  };
+  }
 
-  const handleRename = (e) => {
+  function handleRename(e) {
     e.stopPropagation();
     // opcional: console.log para debug
     // console.log("clicou renomear", conversation);
     onRename?.(conversation);
     closeMenu();
-  };
+  }
 
-  const handleDelete = (e) => {
+  function handleDelete(e) {
     e.stopPropagation();
     // console.log("clicou excluir", conversation);
     onDelete?.(conversation);
     closeMenu();
-  };
+  }
 
   // Fecha ao clicar fora OU tocar (considera menuRef + buttonRef)
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    function handleClickOutside(e) {
       const target = e.target;
       // se não está nem no botão nem no menu, fechar
       if (
@@ -63,11 +65,11 @@ export default function SidebarItem({
       ) {
         setShowMenu(false);
       }
-    };
+    }
 
-    const handleEscape = (e) => {
+    function handleEscape(e) {
       if (e.key === "Escape") setShowMenu(false);
-    };
+    }
 
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("touchstart", handleClickOutside);
@@ -82,14 +84,14 @@ export default function SidebarItem({
   // Atualiza posição se a janela rolar ou redimensionar enquanto o menu está aberto
   useEffect(() => {
     if (!showMenu) return;
-    const updatePos = () => {
+    function updatePos() {
       if (!buttonRef.current) return;
       const rect = buttonRef.current.getBoundingClientRect();
       setPosition({
         top: rect.top + window.scrollY,
         left: rect.right + 12,
       });
-    };
+    }
     window.addEventListener("scroll", updatePos, { passive: true });
     window.addEventListener("resize", updatePos);
     return () => {

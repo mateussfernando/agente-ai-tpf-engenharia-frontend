@@ -114,10 +114,15 @@ export default function ChatPage() {
     }
   };
 
-  const handleNewMessage = (msg) => setMessages((prev) => [...prev, msg]);
-  const closeModal = () => setModal(null);
+  function handleNewMessage(msg) {
+    setMessages((prev) => [...prev, msg]);
+  }
 
-  const handleFileUploaded = (documentId, fileName, templateId) => {
+  function closeModal() {
+    setModal(null);
+  }
+
+  function handleFileUploaded(documentId, fileName, templateId) {
     setAttachedDocumentId(documentId);
     setAttachedFileName(fileName);
     setAttachedTemplateId(templateId);
@@ -126,7 +131,7 @@ export default function ChatPage() {
     alert(
       `Arquivo "${fileName}" e template selecionado! Digite suas instruções.`
     );
-  };
+  }
 
   return (
     <div className="chat-container">

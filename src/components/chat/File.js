@@ -9,10 +9,10 @@ export default function FileAttachment({
   onRemove,
   showRemove = true,
 }) {
-  const handleRemove = (e) => {
+  function handleRemove(e) {
     e.stopPropagation();
     onRemove?.();
-  };
+  }
 
   return (
     <div className="file">

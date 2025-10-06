@@ -1,7 +1,7 @@
 const API_BASE_URL = "https://agente-ia-squad42.onrender.com";
 
 // Função para pegar token do localStorage
-const getToken = () => {
+function getToken() {
   const token = localStorage.getItem("token");
   if (!token) {
     // Redireciona para login se não há token
@@ -9,10 +9,10 @@ const getToken = () => {
     throw new Error("Token não encontrado. Faça login novamente.");
   }
   return token;
-};
+}
 
 // Função para tratar respostas HTTP
-const handleResponse = async (res) => {
+async function handleResponse(res) {
   if (!res.ok) {
     const text = await res.text();
 
@@ -30,10 +30,10 @@ const handleResponse = async (res) => {
   } catch {
     return null;
   }
-};
+}
 
 // Função auxiliar para requisições com token
-const fetchWithToken = async (url, options = {}) => {
+async function fetchWithToken(url, options = {}) {
   const token = getToken();
   const headers = {
     Authorization: `Bearer ${token}`,
@@ -41,7 +41,7 @@ const fetchWithToken = async (url, options = {}) => {
   };
   const res = await fetch(url, { ...options, headers });
   return handleResponse(res);
-};
+}
 
 export const api = {
   /** Login */

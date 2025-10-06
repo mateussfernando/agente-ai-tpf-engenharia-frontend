@@ -1,8 +1,8 @@
 "use client";
-import AuthLayout from "@/components/AuthLayout.js";
-import Input from "../../../../components/Input.js";
-import AuthButton from "@/components/AuthButton.js";
-import AuthSubtitle from "@/components/AuthSubtitle.js";
+import AuthLayout from "@/components/layout/AuthLayout.js";
+import Input from "../../../../components/ui/Input.js";
+import AuthButton from "@/components/ui/AuthButton.js";
+import AuthSubtitle from "@/components/ui/AuthSubtitle.js";
 import { FiUser, FiMail, FiLock } from "react-icons/fi";
 
 export default function Form() {

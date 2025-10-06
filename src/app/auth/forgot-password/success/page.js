@@ -1,7 +1,7 @@
 "use client";
-import AuthLayout from "@/components/AuthLayout.js";
-import AuthButton from "@/components/AuthButton.js";
-import AlertBox from "@/components/AlertBox.js";
+import AuthLayout from "@/components/layout/AuthLayout.js";
+import AuthButton from "@/components/ui/AuthButton.js";
+import AlertBox from "@/components/modals/AlertBox.js";
 
 export default function Success() {
   return (

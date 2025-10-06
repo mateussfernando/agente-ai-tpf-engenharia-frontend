@@ -1,5 +1,5 @@
 import React from "react";
-import "../style/menu-perfil.css";
+import "../../style/menu-perfil.css";
 
 export default function MenuPerfil({ onLogout, userEmail }) {
   const handleLogout = () => {

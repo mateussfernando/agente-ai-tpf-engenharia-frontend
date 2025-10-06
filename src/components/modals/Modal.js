@@ -10,17 +10,17 @@ export default function Modal({ type, chatTitle, onClose, onConfirm }) {
   useEffect(() => {
     if (isRename) inputRef.current?.focus();
 
-    const handleEsc = (e) => {
+    function handleEsc(e) {
       if (e.key === "Escape") onClose();
-    };
+    }
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
   }, [isRename, onClose]);
 
-  const handleConfirm = () => {
+  function handleConfirm() {
     if (isRename && !newTitle.trim()) return;
     onConfirm(isRename ? newTitle.trim() : undefined);
-  };
+  }
 
   return (
     <div className="modal-overlay">

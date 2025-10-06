@@ -1,10 +1,11 @@
 import React from "react";
+import { api } from "../../api/Api";
 import "../../style/menu-perfil.css";
 
-export default function MenuPerfil({ onLogout, userEmail }) {
-  const handleLogout = () => {
-    if (typeof onLogout === "function") onLogout();
-  };
+export default function MenuPerfil({ userEmail }) {
+  function handleLogout() {
+    api.logout();
+  }
 
   return (
     <div className="profile-menu">

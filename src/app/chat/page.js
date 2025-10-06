@@ -109,7 +109,11 @@ export default function ChatPage() {
   const closeModal = () => setModal(null);
   const onLogout = () => (window.location.href = "/auth/login");
 
-  const handleFileUploaded = (documentId, fileName, templateId) => {
+  function closeModal() {
+    setModal(null);
+  }
+
+  function handleFileUploaded(documentId, fileName, templateId) {
     setAttachedDocumentId(documentId);
     setAttachedFileName(fileName);
     setAttachedTemplateId(templateId);

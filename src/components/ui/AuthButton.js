@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 
-const AuthButton = ({ children, onClick, ...props }) => {
+export default function AuthButton({ children, onClick, ...props }) {
   return (
     <button
       onClick={onClick}
@@ -11,6 +11,4 @@ const AuthButton = ({ children, onClick, ...props }) => {
       {children}
     </button>
   );
-};
-
-export default AuthButton;
+}

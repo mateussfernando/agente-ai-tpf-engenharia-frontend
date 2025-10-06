@@ -2,19 +2,19 @@
 import React, { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
-const Input = ({
+export default function Input({
   name,
   placeholder,
   type = "text",
   icon,
   showPasswordToggle = false,
   ...props
-}) => {
+}) {
   const [showPassword, setShowPassword] = useState(false);
 
-  const togglePasswordVisibility = () => {
+  function togglePasswordVisibility() {
     setShowPassword(!showPassword);
-  };
+  }
 
   const inputType = showPasswordToggle
     ? showPassword
@@ -62,6 +62,4 @@ const Input = ({
       </div>
     </div>
   );
-};
-
-export default Input;
+}

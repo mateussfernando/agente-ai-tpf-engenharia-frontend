@@ -21,7 +21,7 @@ export default function AddFileModal({
     }
   }, [currentStep]);
 
-  const loadTemplates = async () => {
+  async function loadTemplates() {
     try {
       setIsLoading(true);
       const templatesData = await api.getTemplates();
@@ -32,9 +32,9 @@ export default function AddFileModal({
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
-  const handleFileUpload = async (file) => {
+  async function handleFileUpload(file) {
     if (!file || !activeConversation) {
       setError("Selecione um arquivo e verifique a conversa ativa.");
       return;
@@ -65,16 +65,16 @@ export default function AddFileModal({
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
-  const handleFileChange = (e) => {
+  function handleFileChange(e) {
     const file = e.target.files[0];
     if (file) {
       handleFileUpload(file);
     }
-  };
+  }
 
-  const handleTemplateSelect = async (template) => {
+  async function handleTemplateSelect(template) {
     if (!uploadedFile) return;
 
     try {
@@ -98,14 +98,14 @@ export default function AddFileModal({
       console.error("Erro ao processar:", err);
       setError("Erro ao selecionar template.");
     }
-  };
+  }
 
-  const goBackToUpload = () => {
+  function goBackToUpload() {
     setCurrentStep(1);
     setUploadedFile(null);
     setSelectedTemplate(null);
     setError(null);
-  };
+  }
 
   return (
     <div className="modal-overlay">

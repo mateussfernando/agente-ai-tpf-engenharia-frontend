@@ -1,7 +1,7 @@
 import React from "react";
 
-const AlertBox = ({ children, type = "success" }) => {
-  const getTypeStyles = () => {
+export default function AlertBox({ children, type = "success" }) {
+  function getTypeStyles() {
     switch (type) {
       case "success":
         return "bg-green-200 text-green-800";
@@ -14,7 +14,7 @@ const AlertBox = ({ children, type = "success" }) => {
       default:
         return "bg-green-200 text-green-800";
     }
-  };
+  }
 
   return (
     <div
@@ -23,6 +23,4 @@ const AlertBox = ({ children, type = "success" }) => {
       {children}
     </div>
   );
-};
-
-export default AlertBox;
+}

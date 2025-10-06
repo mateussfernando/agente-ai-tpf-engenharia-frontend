@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AuthLayout from "@/components/layout/AuthLayout.js";
 import Input from "../../../components/ui/Input.js";
 import AuthButton from "@/components/ui/AuthButton.js";
@@ -9,6 +10,7 @@ import { FiUser, FiLock } from "react-icons/fi";
 import { api } from "../../../api/Api.js";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -24,11 +26,19 @@ export default function LoginPage() {
       // Salva o token correto
       localStorage.setItem("token", data.access_token);
 
-      window.location.href = "/chat";
+      router.push("/chat");
     } catch (err) {
-      setError(err.message);
+      setError(
+        err.message || "Erro ao fazer login. Verifique suas credenciais."
+      );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !loading) {
+      handleLogin();
     }
   };
 
@@ -49,6 +59,7 @@ export default function LoginPage() {
         placeholder="E-mail"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        onKeyPress={handleKeyPress}
         icon={<FiUser className="text-black/25" size={18} />}
       />
 
@@ -58,6 +69,7 @@ export default function LoginPage() {
         placeholder="Senha"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        onKeyPress={handleKeyPress}
         icon={<FiLock className="text-black/25" size={18} />}
         showPasswordToggle={true}
       />

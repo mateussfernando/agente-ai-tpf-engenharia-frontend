@@ -13,11 +13,12 @@
 }
 
 .modal {
-  background: #294781;
-  padding: 2rem;
-  color: #000000;
-  border-radius: 6px;
-  width: 400px;
+  width: 400px; 
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  text-align: center;
 }
 
 .modal-animate {
@@ -27,17 +28,23 @@
 .modal-actions, p{
   display: flex;
   justify-content: center;
-  gap: 10px;
+  padding: 10px;
 }
 
 .modal-actions button {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 1rem;
   border: none;
+  margin: 10px;
   border-radius: 6px;
   cursor: pointer;
 }
 
 .modal-actions .confirm {
-  background: red;
+  background: rgb(142, 247, 116);
+  color: white;
+}
+
+.modal-actions .cancelar {
+  background: rgb(247, 116, 127);
   color: white;
 }

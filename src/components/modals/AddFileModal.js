@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { FiUpload, FiX, FiCheck } from "react-icons/fi";
+import React, { useState, useEffect} from "react";
+import { MdOutlineClose, MdDriveFolderUpload, MdDescription } from "react-icons/md";
 import { api } from "../../api/Api";
 import "../../style/add-file.css";
 

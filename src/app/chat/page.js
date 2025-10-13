@@ -25,7 +25,6 @@ export default function ChatPage() {
   // Estados para gerenciar os anexos
   const [attachedDocumentId, setAttachedDocumentId] = useState(null);
   const [attachedFileName, setAttachedFileName] = useState(null);
-  const [attachedTemplateId, setAttachedTemplateId] = useState(null);
 
   const chatContainerRef = useRef(null);
 
@@ -68,7 +67,6 @@ export default function ChatPage() {
     setActiveConversation(conversation);
     setAttachedDocumentId(null);
     setAttachedFileName(null);
-    setAttachedTemplateId(null);
     try {
       const history = await api.getConversationHistory(
         conversation._id || conversation.id
@@ -142,14 +140,13 @@ export default function ChatPage() {
   const closeModal = () => setModal(null);
   const onLogout = () => (window.location.href = "/auth/login");
 
-  function handleFileUploaded(documentId, fileName, templateId) {
+  function handleFileUploaded(documentId, fileName) {
     setAttachedDocumentId(documentId);
     setAttachedFileName(fileName);
-    setAttachedTemplateId(templateId);
     setShowAddFileModal(false);
 
     alert(
-      `Arquivo "${fileName}" e template selecionado! Digite suas instruções.`
+      `Arquivo "${fileName}" Digite suas instruções.`
     );
   }
 
@@ -169,7 +166,6 @@ export default function ChatPage() {
               setMessages([]);
               setAttachedDocumentId(null);
               setAttachedFileName(null);
-              setAttachedTemplateId(null);
 
               const apiResponse = await api.sendMessage("Novo chat iniciado");
 
@@ -258,8 +254,6 @@ export default function ChatPage() {
           setAttachedDocumentId={setAttachedDocumentId}
           attachedFileName={attachedFileName}
           setAttachedFileName={setAttachedFileName}
-          attachedTemplateId={attachedTemplateId}
-          setAttachedTemplateId={setAttachedTemplateId}
         />
       </main>
 

@@ -43,9 +43,20 @@ export default function InputChat({
         attachedDocumentId
       );
 
+      console.log("Resposta da API:", data); // Para debug
+
       // Limpar anexos após envio
       setAttachedDocumentId(null);
       setAttachedFileName(null);
+
+      // Verificar diferentes campos possíveis da resposta
+      const responseContent =
+        data?.message_content ||
+        data?.content ||
+        data?.response ||
+        data?.message ||
+        data?.answer ||
+        "Resposta recebida, mas conteúdo não identificado.";
 
       onMessageSent?.({
         role: "assistant",

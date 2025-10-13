@@ -52,16 +52,26 @@ export default function InputChat({
         attachedTemplateId
       );
 
+      console.log("Resposta da API:", data); // Para debug
+
       // Limpar anexos após envio
       setAttachedDocumentId(null);
       setAttachedFileName(null);
       setAttachedTemplateId(null);
 
+      // Verificar diferentes campos possíveis da resposta
+      const responseContent =
+        data?.message_content ||
+        data?.content ||
+        data?.response ||
+        data?.message ||
+        data?.answer ||
+        "Resposta recebida, mas conteúdo não identificado.";
+
       onMessageSent?.({
         role: "assistant",
         sender: "bot",
-        content:
-          data?.message_content || data?.content || "Tudo pronto! Clique na conversa no histórico à esquerda para ver a resposta completa.",
+        content: responseContent,
         id: crypto.randomUUID(),
         generated_document_id: data?.document_id,
       });

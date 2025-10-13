@@ -14,7 +14,10 @@ export default function ChatPage() {
   const [conversations, setConversations] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [user, setUser] = useState({ name: "Carregando...", email: "carregando@email.com" });
+  const [user, setUser] = useState({
+    name: "Carregando...",
+    email: "carregando@email.com",
+  });
   const [modal, setModal] = useState(null);
   const [showMenuPerfil, setShowMenuPerfil] = useState(false);
   const [showAddFileModal, setShowAddFileModal] = useState(false);
@@ -56,7 +59,8 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (chatContainerRef.current)
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
   }, [messages]);
 
   // Função para selecionar uma conversa
@@ -66,7 +70,9 @@ export default function ChatPage() {
     setAttachedFileName(null);
     setAttachedTemplateId(null);
     try {
-      const history = await api.getConversationHistory(conversation._id || conversation.id);
+      const history = await api.getConversationHistory(
+        conversation._id || conversation.id
+      );
       setMessages(history || []);
     } catch {
       setMessages([]);
@@ -79,8 +85,10 @@ export default function ChatPage() {
 
     try {
       await api.renameConversation(conversationId, newTitle);
-      setConversations(prev =>
-        prev.map(c => (c._id === conversationId ? { ...c, title: newTitle } : c))
+      setConversations((prev) =>
+        prev.map((c) =>
+          c._id === conversationId ? { ...c, title: newTitle } : c
+        )
       );
       closeModal();
     } catch (err) {
@@ -93,7 +101,9 @@ export default function ChatPage() {
 
     try {
       await api.deleteConversation(conversationId);
-      const newConversations = conversations.filter(c => c._id !== conversationId);
+      const newConversations = conversations.filter(
+        (c) => c._id !== conversationId
+      );
       setConversations(newConversations);
 
       if (activeConversation && activeConversation._id === conversationId) {
@@ -105,13 +115,32 @@ export default function ChatPage() {
     }
   };
 
-  const handleNewMessage = (msg) => setMessages(prev => [...prev, msg]);
+  const handleNewMessage = async (msg) => {
+    console.log("Mensagem recebida:", msg); // Para debug
+    setMessages((prev) => [...prev, msg]);
+
+    // Se for uma mensagem do bot e há uma conversa ativa, recarregar o histórico
+    if (
+      (msg.role === "assistant" || msg.sender === "bot") &&
+      activeConversation
+    ) {
+      try {
+        // Aguardar um pouco para garantir que a API processou a mensagem
+        setTimeout(async () => {
+          console.log("Recarregando histórico da conversa..."); // Para debug
+          const history = await api.getConversationHistory(
+            activeConversation._id || activeConversation.id
+          );
+          console.log("Histórico carregado:", history); // Para debug
+          setMessages(history || []);
+        }, 1000);
+      } catch (err) {
+        console.error("Erro ao recarregar histórico:", err);
+      }
+    }
+  };
   const closeModal = () => setModal(null);
   const onLogout = () => (window.location.href = "/auth/login");
-
-  function closeModal() {
-    setModal(null);
-  }
 
   function handleFileUploaded(documentId, fileName, templateId) {
     setAttachedDocumentId(documentId);
@@ -119,14 +148,18 @@ export default function ChatPage() {
     setAttachedTemplateId(templateId);
     setShowAddFileModal(false);
 
-    alert(`Arquivo "${fileName}" e template selecionado! Digite suas instruções.`);
-  };
+    alert(
+      `Arquivo "${fileName}" e template selecionado! Digite suas instruções.`
+    );
+  }
 
   return (
     <div className="chat-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <h1 className="logo">TPF<span>-AI</span></h1>
+        <h1 className="logo">
+          TPF<span>-AI</span>
+        </h1>
 
         <button
           className="new-chat"
@@ -136,7 +169,7 @@ export default function ChatPage() {
               setMessages([]);
               setAttachedDocumentId(null);
               setAttachedFileName(null);
-              setAttachedTemplateId(null); 
+              setAttachedTemplateId(null);
 
               const apiResponse = await api.sendMessage("Novo chat iniciado");
 
@@ -144,15 +177,19 @@ export default function ChatPage() {
                 throw new Error("API não retornou o ID da nova conversa.");
               }
               const newConvList = await api.getConversations();
-              const newConversation = newConvList.find(c => c._id === apiResponse.conversation_id) || newConvList[0];
+              const newConversation =
+                newConvList.find(
+                  (c) => c._id === apiResponse.conversation_id
+                ) || newConvList[0];
 
               if (!newConversation) {
-                throw new Error("Falha ao recuperar os dados da nova conversa.");
+                throw new Error(
+                  "Falha ao recuperar os dados da nova conversa."
+                );
               }
 
               setConversations(newConvList);
               selectConversation(newConversation);
-
             } catch (err) {
               console.error("Erro ao criar novo chat:", err.message);
             }
@@ -164,7 +201,7 @@ export default function ChatPage() {
         <h4>Histórico</h4>
         <div className="chat-list">
           {conversations
-            .filter(conv => conv && conv._id)
+            .filter((conv) => conv && conv._id)
             .map((conv) => (
               <SidebarItem
                 key={conv._id}
@@ -176,15 +213,24 @@ export default function ChatPage() {
                   setModal({ type: "excluir", chat: conversation })
                 }
                 onSelect={selectConversation}
-                isActive={activeConversation && activeConversation._id === conv._id}
+                isActive={
+                  activeConversation && activeConversation._id === conv._id
+                }
               />
             ))}
         </div>
 
-        <div className="user-profile" onClick={() => setShowMenuPerfil(!showMenuPerfil)}>
-          <div className="user-icon-container"><FaUserCircle size={32} color="#000000ff" /></div>
+        <div
+          className="user-profile"
+          onClick={() => setShowMenuPerfil(!showMenuPerfil)}
+        >
+          <div className="user-icon-container">
+            <FaUserCircle size={32} color="#000000ff" />
+          </div>
           <span>{user.name}</span>
-          {showMenuPerfil && <MenuPerfil onLogout={onLogout} userEmail={user.email} />}
+          {showMenuPerfil && (
+            <MenuPerfil onLogout={onLogout} userEmail={user.email} />
+          )}
         </div>
       </aside>
 

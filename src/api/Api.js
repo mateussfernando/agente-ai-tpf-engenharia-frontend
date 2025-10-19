@@ -173,23 +173,22 @@ export const api = {
     });
   },
 
-  getDocuments: async () => {
-    return fetchWithToken(`${API_BASE_URL}/api/documents`);
-  },
+ downloadDocumentById: async (documentId) => {
+  if (!documentId) throw new Error("ID do documento é obrigatório.");
+  const token = getToken();
 
-  getDocumentMetadata: async (gridfsFileId) => {
-    if (!gridfsFileId) throw new Error("ID do arquivo é obrigatório.");
-    const token = getToken();
+  const res = await fetch(`${API_BASE_URL}/api/documents/${documentId}/download`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-    const res = await fetch(`${API_BASE_URL}/api/files/${gridfsFileId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) {
-      const status = res.status;
-      let errorText = `Erro HTTP: ${status}.`;
-      throw new Error(`Falha ao baixar arquivo. ${errorText}`);
-    }
+  if (!res.ok) {
+    const status = res.status;
+    throw new Error(`Falha ao baixar o documento. Erro HTTP: ${status}`);
+  }
 
-    return res.blob();
-  },
+  const blob = await res.blob();
+  return blob;
+},
 };

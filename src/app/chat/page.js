@@ -233,18 +233,47 @@ export default function ChatPage() {
       {/* Chat principal */}
       <main className="chat-main">
         <div className="chat-messages" ref={chatContainerRef}>
-          {messages.map((msg) => (
-            <div
-              key={msg._id || msg.id}
-              className={`message-bubble ${
-                msg.role === "user" || msg.sender === "user" ? "user" : "bot"
-              }`}
-            >
-              {msg.content}
-              {msg.document_id && <DocumentLink documentId={msg.document_id} />}
-            </div>
-          ))}
+          {messages.map((msg) => {
+            let parsed = null;
+
+            // converter o conteúdo em JSON para uma mensagem
+            try {
+              parsed = JSON.parse(msg.content);
+            } catch {
+              parsed = null;
+            }
+
+            // Define o conteúdo que será exibido (tratando no JSON )
+            const displayContent =
+              parsed && parsed.status === "success" && parsed.message
+                ? parsed.message
+                : msg.content;
+
+            // Define o ID do documento
+            const documentId =
+              (parsed && parsed.document_id) ||
+              msg.document_id ||
+              msg.generated_document_id;
+
+            return (
+              <div
+                key={msg._id || msg.id}
+                className={`message-bubble ${msg.role === "user" || msg.sender === "user" ? "user" : "bot"
+                  }`}
+              >
+                <div className="message-content">{displayContent}</div>
+
+                {/* Exibe botão de download apenas se ouver o id do documento */}
+                {msg.role !== "user" && documentId && (
+                  <div className="document-download-container">
+                    <DocumentLink documentId={documentId} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
+
 
         <InputChat
           activeConversation={activeConversation}

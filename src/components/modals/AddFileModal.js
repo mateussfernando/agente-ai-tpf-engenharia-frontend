@@ -91,7 +91,7 @@ export default function AddFileModal({ onFileUploaded, onClose, activeConversati
                 <MdDescription className="file-icon" />
                 <div className="file-details">
                   <span className="file-name">{uploadedFile.name}</span>
-                  <span className="file-status">✓ Arquivo enviado com sucesso</span>
+                  <span className="file-status"> ✓ Arquivo enviado com sucesso</span>
                 </div>
               </div>
             )}

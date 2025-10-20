@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import Modal from "@/components/modals/Modal";
 import SidebarItem from "@/components/chat/SidebarItem";
 import DocumentLink from "@/components/chat/DocumentLink";
@@ -145,18 +146,22 @@ export default function ChatPage() {
     setAttachedFileName(fileName);
     setShowAddFileModal(false);
 
-    alert(
-      `Arquivo "${fileName}" Digite suas instruções.`
-    );
+    alert(`Arquivo "${fileName}" Digite suas instruções.`);
   }
 
   return (
     <div className="chat-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <h1 className="logo">
-          TPF<span>-AI</span>
-        </h1>
+        <div className="logo">
+          <Image
+            src="/TPF-AI.png"
+            alt="TPF-AI Logo"
+            width={120}
+            height={40}
+            priority
+          />
+        </div>
 
         <button
           className="new-chat"
@@ -258,8 +263,9 @@ export default function ChatPage() {
             return (
               <div
                 key={msg._id || msg.id}
-                className={`message-bubble ${msg.role === "user" || msg.sender === "user" ? "user" : "bot"
-                  }`}
+                className={`message-bubble ${
+                  msg.role === "user" || msg.sender === "user" ? "user" : "bot"
+                }`}
               >
                 <div className="message-content">{displayContent}</div>
 
@@ -273,7 +279,6 @@ export default function ChatPage() {
             );
           })}
         </div>
-
 
         <InputChat
           activeConversation={activeConversation}

@@ -2,12 +2,16 @@
 
 :root {
   --background: #ffffff;
-  --primary: #003399;
-  --secondary: #6699FF;
+  --primary: #153d7a;
+  --secondary: #6699ff;
   --neutral: #d9d9d9;
-
 }
 
 body {
   font-family: var(--font-nunito), Arial, Helvetica, sans-serif;
+}
+
+/* Garantir que todos os elementos herdem a fonte */
+* {
+  font-family: inherit;
 }

@@ -10,6 +10,7 @@ import InputChat from "@/components/chat/InputChat";
 import { FaUserCircle } from "react-icons/fa";
 import { api } from "@/api/Api";
 import "@/style/chat.css";
+import "@/style/sidebar.css";
 
 export default function ChatPage() {
   const [conversations, setConversations] = useState([]);
@@ -141,6 +142,91 @@ export default function ChatPage() {
   const closeModal = () => setModal(null);
   const onLogout = () => (window.location.href = "/auth/login");
 
+  // Função avançada para formatar mensagens da IA
+  const formatMessageContent = (content) => {
+    if (!content) return null;
+
+    // Dividir por linhas para processar cada uma
+    const lines = content.split("\n");
+
+    return lines.map((line, lineIndex) => {
+      const trimmedLine = line.trim();
+
+      // Pular linhas vazias
+      if (!trimmedLine) {
+        return <br key={lineIndex} />;
+      }
+
+      // Detectar títulos (linha que termina com :)
+      if (trimmedLine.endsWith(":") && !trimmedLine.includes("**")) {
+        return (
+          <div key={lineIndex} className="message-title">
+            {processInlineFormatting(trimmedLine)}
+          </div>
+        );
+      }
+
+      // Detectar títulos entre **
+      if (
+        trimmedLine.startsWith("**") &&
+        trimmedLine.endsWith("**") &&
+        trimmedLine.length > 4
+      ) {
+        const titleText = trimmedLine.slice(2, -2);
+        return (
+          <div key={lineIndex} className="message-title">
+            {titleText}
+          </div>
+        );
+      }
+
+      // Detectar listas numeradas (1., 2., etc.)
+      const numberedListMatch = trimmedLine.match(/^(\d+\.)\s+(.+)$/);
+      if (numberedListMatch) {
+        const [, number, text] = numberedListMatch;
+        return (
+          <div key={lineIndex} className="message-list-item numbered">
+            <span className="list-number">{number}</span>
+            <span className="list-text">{processInlineFormatting(text)}</span>
+          </div>
+        );
+      }
+
+      // Detectar listas com bullet (* ou -)
+      if (trimmedLine.match(/^[*-]\s+/)) {
+        const listText = trimmedLine.replace(/^[*-]\s+/, "");
+        return (
+          <div key={lineIndex} className="message-list-item">
+            <span className="list-bullet">•</span>
+            <span className="list-text">
+              {processInlineFormatting(listText)}
+            </span>
+          </div>
+        );
+      }
+
+      // Texto normal com formatação inline
+      return (
+        <div key={lineIndex} className="message-paragraph">
+          {processInlineFormatting(trimmedLine)}
+        </div>
+      );
+    });
+  };
+
+  // Função para processar formatação inline (negrito, etc.)
+  const processInlineFormatting = (text) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+
+    return parts.map((part, index) => {
+      if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+        const boldText = part.slice(2, -2);
+        return <strong key={index}>{boldText}</strong>;
+      }
+      return part;
+    });
+  };
+
   function handleFileUploaded(documentId, fileName) {
     setAttachedDocumentId(documentId);
     setAttachedFileName(fileName);
@@ -237,47 +323,57 @@ export default function ChatPage() {
 
       {/* Chat principal */}
       <main className="chat-main">
-        <div className="chat-messages" ref={chatContainerRef}>
-          {messages.map((msg) => {
-            let parsed = null;
+        <div className="chat-messages-wrapper">
+          <div className="chat-messages" ref={chatContainerRef}>
+            {messages.map((msg) => {
+              let parsed = null;
 
-            // converter o conteúdo em JSON para uma mensagem
-            try {
-              parsed = JSON.parse(msg.content);
-            } catch {
-              parsed = null;
-            }
+              // converter o conteúdo em JSON para uma mensagem
+              try {
+                parsed = JSON.parse(msg.content);
+              } catch {
+                parsed = null;
+              }
 
-            // Define o conteúdo que será exibido (tratando no JSON )
-            const displayContent =
-              parsed && parsed.status === "success" && parsed.message
-                ? parsed.message
-                : msg.content;
+              // Define o conteúdo que será exibido (tratando no JSON )
+              const displayContent =
+                parsed && parsed.status === "success" && parsed.message
+                  ? parsed.message
+                  : msg.content;
 
-            // Define o ID do documento
-            const documentId =
-              (parsed && parsed.document_id) ||
-              msg.document_id ||
-              msg.generated_document_id;
+              // Aplicar formatação apenas para mensagens da IA
+              const formattedContent =
+                msg.role === "assistant" || msg.sender === "bot"
+                  ? formatMessageContent(displayContent)
+                  : displayContent;
 
-            return (
-              <div
-                key={msg._id || msg.id}
-                className={`message-bubble ${
-                  msg.role === "user" || msg.sender === "user" ? "user" : "bot"
-                }`}
-              >
-                <div className="message-content">{displayContent}</div>
+              // Define o ID do documento
+              const documentId =
+                (parsed && parsed.document_id) ||
+                msg.document_id ||
+                msg.generated_document_id;
 
-                {/* Exibe botão de download apenas se ouver o id do documento */}
-                {msg.role !== "user" && documentId && (
-                  <div className="document-download-container">
-                    <DocumentLink documentId={documentId} />
-                  </div>
-                )}
-              </div>
-            );
-          })}
+              return (
+                <div
+                  key={msg._id || msg.id}
+                  className={`message-bubble ${
+                    msg.role === "user" || msg.sender === "user"
+                      ? "user"
+                      : "bot"
+                  }`}
+                >
+                  <div className="message-content">{formattedContent}</div>
+
+                  {/* Exibe botão de download apenas se ouver o id do documento */}
+                  {msg.role !== "user" && documentId && (
+                    <div className="document-download-container">
+                      <DocumentLink documentId={documentId} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <InputChat

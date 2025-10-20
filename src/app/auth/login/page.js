@@ -44,12 +44,9 @@ export default function LoginPage() {
 
   return (
     <AuthLayout>
-      {error && <AlertBox type="error">{error}</AlertBox>}
-      {!error && (
-        <AlertBox type="success">
-          Para continuar, efetue o login ou registre-se
-        </AlertBox>
-      )}
+      <AlertBox type={error ? "error" : "success"}>
+        {error || "Para continuar, efetue o login ou registre-se"}
+      </AlertBox>
 
       <AuthSubtitle>Faça login para continuar</AuthSubtitle>
 

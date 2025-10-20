@@ -32,6 +32,25 @@ async function handleResponse(res) {
   }
 }
 
+// Função específica para login que não redireciona
+async function handleLoginResponse(res) {
+  if (!res.ok) {
+    const text = await res.text();
+
+    // Para login, não redirecionar - apenas lançar erro
+    if (res.status === 401) {
+      throw new Error("Email ou senha incorretos.");
+    }
+
+    throw new Error(`Erro ${res.status}: ${text || res.statusText}`);
+  }
+  try {
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
 // Função auxiliar para requisições com token
 async function fetchWithToken(url, options = {}) {
   const token = getToken();
@@ -52,7 +71,9 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    const data = await handleResponse(res);
+
+    // Usar função específica para login que não redireciona
+    const data = await handleLoginResponse(res);
 
     if (data.access_token) {
       localStorage.setItem("token", data.access_token);
@@ -173,39 +194,44 @@ export const api = {
     });
   },
 
- downloadDocumentById: async (documentId) => {
-  if (!documentId) throw new Error("ID do documento é obrigatório.");
-  const token = getToken();
+  downloadDocumentById: async (documentId) => {
+    if (!documentId) throw new Error("ID do documento é obrigatório.");
+    const token = getToken();
 
-  const res = await fetch(`${API_BASE_URL}/api/documents/${documentId}/download`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+    const res = await fetch(
+      `${API_BASE_URL}/api/documents/${documentId}/download`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  if (!res.ok) {
-    throw new Error(`Falha ao baixar o documento. Erro HTTP: ${res.status}`);
-  }
+    if (!res.ok) {
+      throw new Error(`Falha ao baixar o documento. Erro HTTP: ${res.status}`);
+    }
 
-  const blob = await res.blob();
-  return blob;
-},
+    const blob = await res.blob();
+    return blob;
+  },
 
-getDocumentMetadata: async (documentId) => {
-  if (!documentId) throw new Error("ID do documento é obrigatório.");
-  const token = getToken();
+  getDocumentMetadata: async (documentId) => {
+    if (!documentId) throw new Error("ID do documento é obrigatório.");
+    const token = getToken();
 
-  const res = await fetch(`${API_BASE_URL}/api/documents/${documentId}/metadata`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+    const res = await fetch(
+      `${API_BASE_URL}/api/documents/${documentId}/metadata`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-  if (!res.ok) {
-    throw new Error(`Erro ao buscar metadados. Erro HTTP: ${res.status}`);
-  }
+    if (!res.ok) {
+      throw new Error(`Erro ao buscar metadados. Erro HTTP: ${res.status}`);
+    }
 
-  return await res.json();
-},
-
+    return await res.json();
+  },
 };

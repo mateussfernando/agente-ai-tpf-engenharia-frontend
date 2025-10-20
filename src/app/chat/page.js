@@ -4,7 +4,7 @@ import Image from "next/image";
 import Modal from "@/components/modals/Modal";
 import SidebarItem from "@/components/chat/SidebarItem";
 import DocumentLink from "@/components/chat/DocumentLink";
-import AddFileModal from "@/components/modals/AddFileModal";
+import EnhancedAddFileModal from "@/components/modals/EnhancedAddFileModal";
 import MenuPerfil from "@/components/layout/MenuPerfil";
 import InputChat from "@/components/chat/InputChat";
 import { FaUserCircle } from "react-icons/fa";
@@ -27,6 +27,14 @@ export default function ChatPage() {
   // Estados para gerenciar os anexos
   const [attachedDocumentId, setAttachedDocumentId] = useState(null);
   const [attachedFileName, setAttachedFileName] = useState(null);
+  const [attachedTemplateId, setAttachedTemplateId] = useState(null);
+
+  // Estado para a mensagem atual do input
+  const [currentMessage, setCurrentMessage] = useState("");
+
+  // Estado para instruções ocultas do template
+  const [hiddenTemplateInstructions, setHiddenTemplateInstructions] =
+    useState("");
 
   const chatContainerRef = useRef(null);
 
@@ -69,6 +77,9 @@ export default function ChatPage() {
     setActiveConversation(conversation);
     setAttachedDocumentId(null);
     setAttachedFileName(null);
+    setAttachedTemplateId(null);
+    setCurrentMessage(""); // Limpar mensagem atual ao trocar conversa
+    setHiddenTemplateInstructions(""); // Limpar instruções ocultas
     try {
       const history = await api.getConversationHistory(
         conversation._id || conversation.id
@@ -227,12 +238,88 @@ export default function ChatPage() {
     });
   };
 
-  function handleFileUploaded(documentId, fileName) {
+  function handleFileUploaded(
+    documentId,
+    fileName,
+    templateId,
+    templateInstruction,
+    autoSend = true,
+    isHidden = false
+  ) {
     setAttachedDocumentId(documentId);
     setAttachedFileName(fileName);
+    setAttachedTemplateId(templateId);
     setShowAddFileModal(false);
 
-    alert(`Arquivo "${fileName}" Digite suas instruções.`);
+    if (templateInstruction) {
+      if (autoSend) {
+        // Envio automático (não usado mais)
+        handleAutoSendTemplate(null, fileName, templateInstruction);
+      } else {
+        if (isHidden) {
+          // Instruções ocultas - armazena separadamente, campo de input fica limpo
+          setHiddenTemplateInstructions(templateInstruction);
+          setCurrentMessage(""); // Campo vazio para o usuário digitar
+          alert(
+            `Template "${fileName}" preparado! Digite suas instruções específicas e envie.`
+          );
+        } else {
+          // Instruções visíveis normais
+          setCurrentMessage(templateInstruction);
+          alert(
+            `Template "${fileName}" adicionado ao chat! Complete com seu contexto específico (ex: "sobre energias renováveis") antes de enviar.`
+          );
+        }
+      }
+    } else {
+      alert(`Arquivo "${fileName}" anexado! Digite suas instruções.`);
+    }
+  }
+
+  // Função para enviar automaticamente mensagem com template
+  async function handleAutoSendTemplate(templateId, fileName, prompt) {
+    if (!activeConversation) return;
+
+    try {
+      // Adicionar mensagem do usuário
+      const userMessage = {
+        role: "user",
+        sender: "user",
+        content: prompt,
+        id: crypto.randomUUID(),
+        attachedTemplateId: templateId,
+        attachedFileName: fileName,
+      };
+
+      setMessages((prev) => [...prev, userMessage]);
+
+      // Enviar para API - backend identifica template pelo nome no prompt
+      const conversationId = activeConversation?._id || activeConversation?.id;
+      const data = await api.sendMessage(prompt, conversationId, null, null);
+
+      // Adicionar resposta da IA
+      const botMessage = {
+        role: "assistant",
+        sender: "bot",
+        content:
+          data?.message_content ||
+          data?.content ||
+          "Template processado com sucesso!",
+        id: crypto.randomUUID(),
+        generated_document_id: data?.document_id,
+      };
+
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (err) {
+      console.error("Erro ao processar template:", err);
+      const errorMessage = {
+        role: "assistant",
+        sender: "bot",
+        content: "Erro ao processar o template. Tente novamente.",
+        id: crypto.randomUUID(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    }
   }
 
   return (
@@ -257,6 +344,9 @@ export default function ChatPage() {
               setMessages([]);
               setAttachedDocumentId(null);
               setAttachedFileName(null);
+              setAttachedTemplateId(null);
+              setCurrentMessage(""); // Limpar mensagem atual ao criar nova conversa
+              setHiddenTemplateInstructions(""); // Limpar instruções ocultas
 
               const apiResponse = await api.sendMessage("Novo chat iniciado");
 
@@ -384,6 +474,12 @@ export default function ChatPage() {
           setAttachedDocumentId={setAttachedDocumentId}
           attachedFileName={attachedFileName}
           setAttachedFileName={setAttachedFileName}
+          attachedTemplateId={attachedTemplateId}
+          setAttachedTemplateId={setAttachedTemplateId}
+          initialMessage={currentMessage}
+          onMessageChange={setCurrentMessage}
+          hiddenTemplateInstructions={hiddenTemplateInstructions}
+          setHiddenTemplateInstructions={setHiddenTemplateInstructions}
         />
       </main>
 
@@ -402,7 +498,7 @@ export default function ChatPage() {
       )}
 
       {showAddFileModal && (
-        <AddFileModal
+        <EnhancedAddFileModal
           onClose={() => setShowAddFileModal(false)}
           activeConversation={activeConversation}
           onFileUploaded={handleFileUploaded}

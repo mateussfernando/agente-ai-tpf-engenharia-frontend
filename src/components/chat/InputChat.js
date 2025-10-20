@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiSend, FiPlus } from "react-icons/fi";
 import { api } from "../../api/Api";
 import File from "./File";
@@ -12,19 +12,39 @@ export default function InputChat({
   setAttachedDocumentId,
   attachedFileName,
   setAttachedFileName,
+  initialMessage = "",
+  onMessageChange,
+  hiddenTemplateInstructions = "",
+  setHiddenTemplateInstructions,
 }) {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(initialMessage);
   const [isSending, setIsSending] = useState(false);
+
+  // Atualizar mensagem quando initialMessage mudar
+  useEffect(() => {
+    if (initialMessage !== message) {
+      setMessage(initialMessage);
+    }
+  }, [initialMessage]);
 
   const sendMessage = async () => {
     const userPrompt = message.trim();
-    if (!activeConversation || (!userPrompt && !attachedDocumentId) || isSending)
+    if (
+      !activeConversation ||
+      (!userPrompt && !attachedDocumentId) ||
+      isSending
+    )
       return;
 
     setIsSending(true);
 
     try {
-      // Enviar mensagem do usuário
+      // Combinar instruções ocultas do template com a mensagem do usuário
+      const finalPrompt = hiddenTemplateInstructions
+        ? `${hiddenTemplateInstructions}. ${userPrompt}`
+        : userPrompt || "Processar este arquivo";
+
+      // Enviar mensagem do usuário (mostra apenas o que o usuário digitou)
       onMessageSent?.({
         role: "user",
         sender: "user",
@@ -36,9 +56,9 @@ export default function InputChat({
 
       const conversationId = activeConversation?._id || activeConversation?.id;
 
-      // Enviar para API (sem template)
+      // Enviar para API (com instruções ocultas combinadas)
       const data = await api.sendMessage(
-        userPrompt || "Processar este arquivo",
+        finalPrompt,
         conversationId,
         attachedDocumentId
       );
@@ -61,10 +81,7 @@ export default function InputChat({
       onMessageSent?.({
         role: "assistant",
         sender: "bot",
-        content:
-          data?.message_content ||
-          data?.content ||
-          "Aguarde um pouco.",
+        content: data?.message_content || data?.content || "Aguarde um pouco.",
         id: crypto.randomUUID(),
         generated_document_id: data?.document_id,
       });
@@ -80,6 +97,10 @@ export default function InputChat({
     } finally {
       setIsSending(false);
       setMessage("");
+      // Limpar instruções ocultas após o envio
+      if (setHiddenTemplateInstructions) {
+        setHiddenTemplateInstructions("");
+      }
     }
   };
 
@@ -131,7 +152,10 @@ export default function InputChat({
           type="text"
           placeholder={getPlaceholderText()}
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            onMessageChange?.(e.target.value);
+          }}
           onKeyDown={handleKeyDown}
           disabled={isSending}
         />

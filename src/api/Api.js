@@ -152,7 +152,7 @@ export const api = {
     prompt,
     conversationId = null,
     attachedDocumentId = null,
-    templateId = null
+    templateId = null // Mantido para compatibilidade, mas não usado
   ) => {
     if (!prompt) throw new Error("Mensagem não pode ser vazia.");
     const url = `${API_BASE_URL}/api/chat/conversations`;
@@ -166,9 +166,7 @@ export const api = {
     if (attachedDocumentId) {
       requestBody.input_document_id = attachedDocumentId;
     }
-    if (templateId) {
-      requestBody.template_id = templateId;
-    }
+    // template_id removido - backend identifica template pelo nome no prompt
 
     const data = await fetchWithToken(url, {
       method: "POST",
@@ -179,8 +177,13 @@ export const api = {
     return data;
   },
   /**para lista os templates disponiveis **/
-  getTemplates: async () => {
-    return fetchWithToken(`${API_BASE_URL}/api/templates`);
+  getTemplates: async (page = 1, limit = 50) => {
+    const response = await fetchWithToken(
+      `${API_BASE_URL}/api/templates?page=${page}&limit=${limit}`
+    );
+    // Backend retorna { data: [...], pagination: {...} }
+    // Retornamos apenas os dados para manter compatibilidade
+    return response?.data || response || [];
   },
 
   /** rotas dos documentos */

@@ -7,14 +7,14 @@ export default function DocumentLink({ documentId }) {
 
   const handleDownload = async () => {
     try {
-      // Busca o arquivo como blob
+      // Busca os metadados para pegar o nome original
+      const metadata = await api.getDocumentMetadata(documentId);
+      const fileName = metadata?.filename || "Documento_TPF-AI.pdf";
+
+      // Baixa o arquivo em blob
       const blob = await api.downloadDocumentById(documentId);
 
-      // Busca metadados para obter o nome original
-      const metadata = await api.downloadDocumentById(documentId);
-      const fileName = metadata.filename || "Documento_TPF-AI.pdf";
-
-      // Cria link temporário para download
+      //Cria link temporário e dispara o download
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;

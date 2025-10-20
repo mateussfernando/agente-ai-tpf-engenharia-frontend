@@ -184,11 +184,28 @@ export const api = {
   });
 
   if (!res.ok) {
-    const status = res.status;
-    throw new Error(`Falha ao baixar o documento. Erro HTTP: ${status}`);
+    throw new Error(`Falha ao baixar o documento. Erro HTTP: ${res.status}`);
   }
 
   const blob = await res.blob();
   return blob;
 },
+
+getDocumentMetadata: async (documentId) => {
+  if (!documentId) throw new Error("ID do documento é obrigatório.");
+  const token = getToken();
+
+  const res = await fetch(`${API_BASE_URL}/api/documents/${documentId}/metadata`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Erro ao buscar metadados. Erro HTTP: ${res.status}`);
+  }
+
+  return await res.json();
+},
+
 };

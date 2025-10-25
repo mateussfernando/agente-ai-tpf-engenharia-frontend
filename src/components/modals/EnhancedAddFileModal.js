@@ -6,6 +6,7 @@ import {
   MdAutoFixHigh,
 } from "react-icons/md";
 import { api } from "../../api/Api";
+import instructions from "../../utils/Instructions";
 import "../../style/add-file.css";
 
 export default function EnhancedAddFileModal({
@@ -21,10 +22,25 @@ export default function EnhancedAddFileModal({
   // Estados para templates
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedInstructionType, setSelectedInstructionType] = useState("pdf"); // Tipo de instrução padrão
 
-  // Instruções predefinidas ocultas que serão aplicadas automaticamente
-  const getHiddenInstructions = (templateName) => {
-    return `Use o template '${templateName}' para: preencher completamente este template com informações densas, detalhadas e profissionais, preenchendo todos os campos e seções disponíveis com dados realistas e relevantes, criando um documento profissional e técnico com linguagem formal, incluindo análises técnicas, especificações e informações detalhadas, gerando um relatório técnico completo incluindo metodologia, análises detalhadas, dados fundamentados e conclusões`;
+  // Obter instruções do arquivo centralizado
+  const getHiddenInstructions = (templateName, instructionType = "pdf") => {
+    // Mapear tipos de instruções para suas categorias
+    const categoryMap = {
+      pdf: "documentTemplates",
+      technicalAnalysis: "documentTemplates",
+      executiveSummary: "documentTemplates",
+      dataExtraction: "documentTemplates",
+      toPdf: "conversionInstructions",
+      toDocx: "conversionInstructions",
+      toExcel: "conversionInstructions",
+    };
+
+    const category = categoryMap[instructionType] || "documentTemplates";
+    const instruction = instructions.getInstruction(category, instructionType);
+
+    return instruction;
   };
 
   // Carregar templates ao abrir o modal
@@ -101,8 +117,11 @@ export default function EnhancedAddFileModal({
       return;
     }
 
-    // Criar instruções ocultas combinadas das 3 opções
-    const hiddenInstructions = getHiddenInstructions(selectedTemplate.filename);
+    // Buscar instruções do arquivo centralizado
+    const hiddenInstructions = getHiddenInstructions(
+      selectedTemplate.filename,
+      selectedInstructionType
+    );
 
     if (onFileUploaded) {
       // Passa as instruções ocultas para serem adicionadas ao input
@@ -232,10 +251,32 @@ export default function EnhancedAddFileModal({
               {/* Botão para usar template selecionado */}
               {selectedTemplate && (
                 <div className="template-actions">
+                  <div className="instruction-type-selector">
+                    <label htmlFor="instruction-type">
+                      Tipo de Processamento:
+                    </label>
+                    <select
+                      id="instruction-type"
+                      value={selectedInstructionType}
+                      onChange={(e) =>
+                        setSelectedInstructionType(e.target.value)
+                      }
+                      className="instruction-select"
+                    >
+                      <option value="pdf">Leitura Padrão</option>
+                      <option value="technicalAnalysis">Análise Técnica</option>
+                      <option value="executiveSummary">Resumo Executivo</option>
+                      <option value="dataExtraction">Extração de Dados</option>
+                      <option value="toPdf">Converter para PDF</option>
+                      <option value="toDocx">Converter para Word</option>
+                      <option value="toExcel">Converter para Excel</option>
+                    </select>
+                  </div>
+
                   <div className="template-action-info">
                     <small>
-                      💡 O template será preparado automaticamente para uso.
-                      Adicione suas instruções específicas no chat.
+                      💡 O arquivo será preparado para leitura. Adicione suas
+                      instruções específicas no chat.
                     </small>
                   </div>
                   <button

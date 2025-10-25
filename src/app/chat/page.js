@@ -24,17 +24,23 @@ export default function ChatPage() {
   const [showMenuPerfil, setShowMenuPerfil] = useState(false);
   const [showAddFileModal, setShowAddFileModal] = useState(false);
 
-  // Estados para gerenciar os anexos
-  const [attachedDocumentId, setAttachedDocumentId] = useState(null);
-  const [attachedFileName, setAttachedFileName] = useState(null);
-  const [attachedTemplateId, setAttachedTemplateId] = useState(null);
+  // Estados para gerenciar os anexos (agora como arrays para múltiplos)
+  const [attachedFiles, setAttachedFiles] = useState([]); // Array de {id, name}
+  const [attachedTemplates, setAttachedTemplates] = useState([]); // Array de {id, name, instructions}
 
   // Estado para a mensagem atual do input
   const [currentMessage, setCurrentMessage] = useState("");
 
-  // Estado para instruções ocultas do template
-  const [hiddenTemplateInstructions, setHiddenTemplateInstructions] =
-    useState("");
+  // Manter compatibilidade com código existente (pega o primeiro ou null)
+  const attachedDocumentId =
+    attachedFiles.length > 0 ? attachedFiles[0].id : null;
+  const attachedFileName =
+    attachedFiles.length > 0 ? attachedFiles[0].name : null;
+  const attachedTemplateId =
+    attachedTemplates.length > 0 ? attachedTemplates[0].id : null;
+  const hiddenTemplateInstructions = attachedTemplates
+    .map((t) => t.instructions)
+    .join(". ");
 
   const chatContainerRef = useRef(null);
 
@@ -75,11 +81,9 @@ export default function ChatPage() {
   // Função para selecionar uma conversa
   const selectConversation = async (conversation) => {
     setActiveConversation(conversation);
-    setAttachedDocumentId(null);
-    setAttachedFileName(null);
-    setAttachedTemplateId(null);
+    setAttachedFiles([]);
+    setAttachedTemplates([]);
     setCurrentMessage(""); // Limpar mensagem atual ao trocar conversa
-    setHiddenTemplateInstructions(""); // Limpar instruções ocultas
     try {
       const history = await api.getConversationHistory(
         conversation._id || conversation.id
@@ -246,9 +250,6 @@ export default function ChatPage() {
     autoSend = true,
     isHidden = false
   ) {
-    setAttachedDocumentId(documentId);
-    setAttachedFileName(fileName);
-    setAttachedTemplateId(templateId);
     setShowAddFileModal(false);
 
     if (templateInstruction) {
@@ -257,12 +258,16 @@ export default function ChatPage() {
         handleAutoSendTemplate(null, fileName, templateInstruction);
       } else {
         if (isHidden) {
-          // Instruções ocultas - armazena separadamente, campo de input fica limpo
-          setHiddenTemplateInstructions(templateInstruction);
+          // Instruções ocultas - adiciona ao array de templates
+          setAttachedTemplates((prev) => [
+            ...prev,
+            {
+              id: templateId,
+              name: fileName,
+              instructions: templateInstruction,
+            },
+          ]);
           setCurrentMessage(""); // Campo vazio para o usuário digitar
-          alert(
-            `Template "${fileName}" preparado! Digite suas instruções específicas e envie.`
-          );
         } else {
           // Instruções visíveis normais
           setCurrentMessage(templateInstruction);
@@ -272,8 +277,26 @@ export default function ChatPage() {
         }
       }
     } else {
+      // Arquivo sem template - adiciona ao array de arquivos
+      setAttachedFiles((prev) => [...prev, { id: documentId, name: fileName }]);
       alert(`Arquivo "${fileName}" anexado! Digite suas instruções.`);
     }
+  }
+
+  // Função para remover template antes de enviar
+  function handleRemoveTemplate(templateId) {
+    setAttachedTemplates((prev) => prev.filter((t) => t.id !== templateId));
+  }
+
+  // Função para remover arquivo antes de enviar
+  function handleRemoveFile(fileId) {
+    setAttachedFiles((prev) => prev.filter((f) => f.id !== fileId));
+  }
+
+  // Função para limpar todos os anexos após enviar mensagem
+  function handleClearAllAttachments() {
+    setAttachedFiles([]);
+    setAttachedTemplates([]);
   }
 
   // Função para enviar automaticamente mensagem com template
@@ -342,11 +365,9 @@ export default function ChatPage() {
             try {
               setActiveConversation(null);
               setMessages([]);
-              setAttachedDocumentId(null);
-              setAttachedFileName(null);
-              setAttachedTemplateId(null);
+              setAttachedFiles([]);
+              setAttachedTemplates([]);
               setCurrentMessage(""); // Limpar mensagem atual ao criar nova conversa
-              setHiddenTemplateInstructions(""); // Limpar instruções ocultas
 
               const apiResponse = await api.sendMessage("Novo chat iniciado");
 
@@ -471,15 +492,22 @@ export default function ChatPage() {
           onMessageSent={handleNewMessage}
           onOpenAddFileModal={() => setShowAddFileModal(true)}
           attachedDocumentId={attachedDocumentId}
-          setAttachedDocumentId={setAttachedDocumentId}
+          setAttachedDocumentId={(id) => {
+            if (id === null) setAttachedFiles([]);
+            else setAttachedFiles([{ id, name: attachedFileName }]);
+          }}
           attachedFileName={attachedFileName}
-          setAttachedFileName={setAttachedFileName}
-          attachedTemplateId={attachedTemplateId}
-          setAttachedTemplateId={setAttachedTemplateId}
+          setAttachedFileName={(name) => {
+            if (name === null) setAttachedFiles([]);
+          }}
           initialMessage={currentMessage}
           onMessageChange={setCurrentMessage}
           hiddenTemplateInstructions={hiddenTemplateInstructions}
-          setHiddenTemplateInstructions={setHiddenTemplateInstructions}
+          attachedTemplates={attachedTemplates}
+          attachedFiles={attachedFiles}
+          onRemoveTemplate={handleRemoveTemplate}
+          onRemoveFile={handleRemoveFile}
+          onClearAllAttachments={handleClearAllAttachments}
         />
       </main>
 

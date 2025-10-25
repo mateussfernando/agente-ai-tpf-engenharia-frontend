@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FiSend, FiPlus } from "react-icons/fi";
 import { api } from "../../api/Api";
-import File from "./File";
+import AttachmentChips from "./AttachmentChips";
 import "../../style/chat.css";
 
 export default function InputChat({
@@ -16,6 +16,11 @@ export default function InputChat({
   onMessageChange,
   hiddenTemplateInstructions = "",
   setHiddenTemplateInstructions,
+  attachedTemplates = [], // Array de templates
+  attachedFiles = [], // Array de arquivos
+  onRemoveTemplate,
+  onRemoveFile,
+  onClearAllAttachments, // Nova prop para limpar tudo após envio
 }) {
   const [message, setMessage] = useState(initialMessage);
   const [isSending, setIsSending] = useState(false);
@@ -66,8 +71,13 @@ export default function InputChat({
       console.log("Resposta da API:", data); // Para debug
 
       // Limpar anexos após envio
-      setAttachedDocumentId(null);
-      setAttachedFileName(null);
+      if (onClearAllAttachments) {
+        onClearAllAttachments();
+      } else {
+        // Fallback para compatibilidade
+        setAttachedDocumentId(null);
+        setAttachedFileName(null);
+      }
 
       // Verificar diferentes campos possíveis da resposta
       const responseContent =
@@ -97,10 +107,8 @@ export default function InputChat({
     } finally {
       setIsSending(false);
       setMessage("");
-      // Limpar instruções ocultas após o envio
-      if (setHiddenTemplateInstructions) {
-        setHiddenTemplateInstructions("");
-      }
+      // Limpar instruções ocultas após o envio não é mais necessário
+      // pois será feito via onRemoveTemplate no componente pai
     }
   };
 
@@ -124,16 +132,13 @@ export default function InputChat({
 
   return (
     <div className="chat-input-container">
-      {/* Área de anexo — mostra arquivo se houver */}
-      {attachedDocumentId && (
-        <div className="attachment-preview">
-          <File
-            documentId={attachedDocumentId}
-            fileName={attachedFileName}
-            onRemove={handleRemoveAttachment}
-          />
-        </div>
-      )}
+      {/* Chips de anexos (template e arquivos) */}
+      <AttachmentChips
+        templates={attachedTemplates}
+        files={attachedFiles}
+        onRemoveTemplate={onRemoveTemplate}
+        onRemoveFile={onRemoveFile}
+      />
 
       {/* Área de input */}
       <div

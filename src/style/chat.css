@@ -27,6 +27,7 @@ body {
 .chat-input-container {
   width: 75%;
   margin: 0 auto 20px auto;
+  position: relative; /* Para o absolute dos chips funcionar */
 }
 
 .attachment-preview {
@@ -35,6 +36,7 @@ body {
   border-radius: 8px;
   padding: 10px;
 }
+
 /* Baixar arquivo */
 .document-download-container {
   margin-top: 5px;

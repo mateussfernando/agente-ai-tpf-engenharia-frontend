@@ -55,20 +55,21 @@ export default function InputChat({
         sender: "user",
         content: userPrompt || "Processar arquivo",
         id: crypto.randomUUID(),
-        attachedDocumentId: attachedDocumentId,
-        attachedFileName: attachedFileName,
+        attachedDocumentId,
+        attachedFileName,
       });
 
       const conversationId = activeConversation?._id || activeConversation?.id;
 
-      // Enviar para API (com instruções ocultas combinadas)
+      // Limpa o input imediatamente após enviar
+      setMessage("");
+
+      // Enviar para API
       const data = await api.sendMessage(
         finalPrompt,
         conversationId,
         attachedDocumentId
       );
-
-      console.log("Resposta da API:", data); // Para debug
 
       // Limpar anexos após envio
       if (onClearAllAttachments) {
@@ -79,15 +80,7 @@ export default function InputChat({
         setAttachedFileName(null);
       }
 
-      // Verificar diferentes campos possíveis da resposta
-      const responseContent =
-        data?.message_content ||
-        data?.content ||
-        data?.response ||
-        data?.message ||
-        data?.answer ||
-        "Resposta recebida, mas conteúdo não identificado.";
-
+      // Mostrar resposta do bot
       onMessageSent?.({
         role: "assistant",
         sender: "bot",
@@ -106,9 +99,6 @@ export default function InputChat({
       });
     } finally {
       setIsSending(false);
-      setMessage("");
-      // Limpar instruções ocultas após o envio não é mais necessário
-      // pois será feito via onRemoveTemplate no componente pai
     }
   };
 
@@ -132,18 +122,17 @@ export default function InputChat({
 
   return (
     <div className="chat-input-container">
-      {/* Chips de anexos (template e arquivos) */}
-      <AttachmentChips
-        templates={attachedTemplates}
-        files={attachedFiles}
-        onRemoveTemplate={onRemoveTemplate}
-        onRemoveFile={onRemoveFile}
-      />
+      {attachedDocumentId && (
+        <div className="attachment-preview">
+          <File
+            documentId={attachedDocumentId}
+            fileName={attachedFileName}
+            onRemove={handleRemoveAttachment}
+          />
+        </div>
+      )}
 
-      {/* Área de input */}
-      <div
-        className={`chat-input ${attachedDocumentId ? "has-attachment" : ""}`}
-      >
+      <div className={`chat-input ${attachedDocumentId ? "has-attachment" : ""}`}>
         <button
           className="add-file-btn"
           onClick={onOpenAddFileModal}

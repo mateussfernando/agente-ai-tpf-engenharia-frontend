@@ -43,6 +43,7 @@ export default function ChatPage() {
     .join(". ");
 
   const chatContainerRef = useRef(null);
+  const [currentMessage, setCurrentMessage] = useState("");
 
   // Carrega conversas e usuário ao abrir
   useEffect(() => {
@@ -497,17 +498,8 @@ export default function ChatPage() {
             else setAttachedFiles([{ id, name: attachedFileName }]);
           }}
           attachedFileName={attachedFileName}
-          setAttachedFileName={(name) => {
-            if (name === null) setAttachedFiles([]);
-          }}
-          initialMessage={currentMessage}
-          onMessageChange={setCurrentMessage}
-          hiddenTemplateInstructions={hiddenTemplateInstructions}
-          attachedTemplates={attachedTemplates}
-          attachedFiles={attachedFiles}
-          onRemoveTemplate={handleRemoveTemplate}
-          onRemoveFile={handleRemoveFile}
-          onClearAllAttachments={handleClearAllAttachments}
+          setAttachedFileName={setAttachedFileName}
+          
         />
       </main>
 

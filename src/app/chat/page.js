@@ -27,6 +27,7 @@ export default function ChatPage() {
   const [attachedFileName, setAttachedFileName] = useState(null);
 
   const chatContainerRef = useRef(null);
+  const [currentMessage, setCurrentMessage] = useState("");
 
   // Carrega conversas e usuário ao abrir
   useEffect(() => {
@@ -283,6 +284,7 @@ export default function ChatPage() {
           setAttachedDocumentId={setAttachedDocumentId}
           attachedFileName={attachedFileName}
           setAttachedFileName={setAttachedFileName}
+          
         />
       </main>
 

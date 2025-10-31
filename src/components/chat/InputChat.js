@@ -30,34 +30,27 @@ export default function InputChat({
         sender: "user",
         content: userPrompt || "Processar arquivo",
         id: crypto.randomUUID(),
-        attachedDocumentId: attachedDocumentId,
-        attachedFileName: attachedFileName,
+        attachedDocumentId,
+        attachedFileName,
       });
 
       const conversationId = activeConversation?._id || activeConversation?.id;
 
-      // Enviar para API (sem template)
+      // Limpa o input imediatamente após enviar
+      setMessage("");
+
+      // Enviar para API
       const data = await api.sendMessage(
         userPrompt || "Processar este arquivo",
         conversationId,
         attachedDocumentId
       );
 
-      console.log("Resposta da API:", data); // Para debug
-
       // Limpar anexos após envio
       setAttachedDocumentId(null);
       setAttachedFileName(null);
 
-      // Verificar diferentes campos possíveis da resposta
-      const responseContent =
-        data?.message_content ||
-        data?.content ||
-        data?.response ||
-        data?.message ||
-        data?.answer ||
-        "Resposta recebida, mas conteúdo não identificado.";
-
+      // Mostrar resposta do bot
       onMessageSent?.({
         role: "assistant",
         sender: "bot",
@@ -79,7 +72,6 @@ export default function InputChat({
       });
     } finally {
       setIsSending(false);
-      setMessage("");
     }
   };
 
@@ -103,7 +95,6 @@ export default function InputChat({
 
   return (
     <div className="chat-input-container">
-      {/* Área de anexo — mostra arquivo se houver */}
       {attachedDocumentId && (
         <div className="attachment-preview">
           <File
@@ -114,10 +105,7 @@ export default function InputChat({
         </div>
       )}
 
-      {/* Área de input */}
-      <div
-        className={`chat-input ${attachedDocumentId ? "has-attachment" : ""}`}
-      >
+      <div className={`chat-input ${attachedDocumentId ? "has-attachment" : ""}`}>
         <button
           className="add-file-btn"
           onClick={onOpenAddFileModal}

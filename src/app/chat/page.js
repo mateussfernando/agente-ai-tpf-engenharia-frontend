@@ -1,14 +1,16 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import Modal from "@/components/modals/Modal";
 import SidebarItem from "@/components/chat/SidebarItem";
 import DocumentLink from "@/components/chat/DocumentLink";
-import AddFileModal from "@/components/modals/AddFileModal";
+import EnhancedAddFileModal from "@/components/modals/EnhancedAddFileModal";
 import MenuPerfil from "@/components/layout/MenuPerfil";
 import InputChat from "@/components/chat/InputChat";
 import { FaUserCircle } from "react-icons/fa";
 import { api } from "@/api/Api";
 import "@/style/chat.css";
+import "@/style/sidebar.css";
 
 export default function ChatPage() {
   const [conversations, setConversations] = useState([]);
@@ -22,9 +24,23 @@ export default function ChatPage() {
   const [showMenuPerfil, setShowMenuPerfil] = useState(false);
   const [showAddFileModal, setShowAddFileModal] = useState(false);
 
-  // Estados para gerenciar os anexos
-  const [attachedDocumentId, setAttachedDocumentId] = useState(null);
-  const [attachedFileName, setAttachedFileName] = useState(null);
+  // Estados para gerenciar os anexos (agora como arrays para múltiplos)
+  const [attachedFiles, setAttachedFiles] = useState([]); // Array de {id, name}
+  const [attachedTemplates, setAttachedTemplates] = useState([]); // Array de {id, name, instructions}
+
+  // Estado para a mensagem atual do input
+  const [currentMessage, setCurrentMessage] = useState("");
+
+  // Manter compatibilidade com código existente (pega o primeiro ou null)
+  const attachedDocumentId =
+    attachedFiles.length > 0 ? attachedFiles[0].id : null;
+  const attachedFileName =
+    attachedFiles.length > 0 ? attachedFiles[0].name : null;
+  const attachedTemplateId =
+    attachedTemplates.length > 0 ? attachedTemplates[0].id : null;
+  const hiddenTemplateInstructions = attachedTemplates
+    .map((t) => t.instructions)
+    .join(". ");
 
   const chatContainerRef = useRef(null);
   const [currentMessage, setCurrentMessage] = useState("");
@@ -66,8 +82,9 @@ export default function ChatPage() {
   // Função para selecionar uma conversa
   const selectConversation = async (conversation) => {
     setActiveConversation(conversation);
-    setAttachedDocumentId(null);
-    setAttachedFileName(null);
+    setAttachedFiles([]);
+    setAttachedTemplates([]);
+    setCurrentMessage(""); // Limpar mensagem atual ao trocar conversa
     try {
       const history = await api.getConversationHistory(
         conversation._id || conversation.id
@@ -141,23 +158,207 @@ export default function ChatPage() {
   const closeModal = () => setModal(null);
   const onLogout = () => (window.location.href = "/auth/login");
 
-  function handleFileUploaded(documentId, fileName) {
-    setAttachedDocumentId(documentId);
-    setAttachedFileName(fileName);
+  // Função avançada para formatar mensagens da IA
+  const formatMessageContent = (content) => {
+    if (!content) return null;
+
+    // Dividir por linhas para processar cada uma
+    const lines = content.split("\n");
+
+    return lines.map((line, lineIndex) => {
+      const trimmedLine = line.trim();
+
+      // Pular linhas vazias
+      if (!trimmedLine) {
+        return <br key={lineIndex} />;
+      }
+
+      // Detectar títulos (linha que termina com :)
+      if (trimmedLine.endsWith(":") && !trimmedLine.includes("**")) {
+        return (
+          <div key={lineIndex} className="message-title">
+            {processInlineFormatting(trimmedLine)}
+          </div>
+        );
+      }
+
+      // Detectar títulos entre **
+      if (
+        trimmedLine.startsWith("**") &&
+        trimmedLine.endsWith("**") &&
+        trimmedLine.length > 4
+      ) {
+        const titleText = trimmedLine.slice(2, -2);
+        return (
+          <div key={lineIndex} className="message-title">
+            {titleText}
+          </div>
+        );
+      }
+
+      // Detectar listas numeradas (1., 2., etc.)
+      const numberedListMatch = trimmedLine.match(/^(\d+\.)\s+(.+)$/);
+      if (numberedListMatch) {
+        const [, number, text] = numberedListMatch;
+        return (
+          <div key={lineIndex} className="message-list-item numbered">
+            <span className="list-number">{number}</span>
+            <span className="list-text">{processInlineFormatting(text)}</span>
+          </div>
+        );
+      }
+
+      // Detectar listas com bullet (* ou -)
+      if (trimmedLine.match(/^[*-]\s+/)) {
+        const listText = trimmedLine.replace(/^[*-]\s+/, "");
+        return (
+          <div key={lineIndex} className="message-list-item">
+            <span className="list-bullet">•</span>
+            <span className="list-text">
+              {processInlineFormatting(listText)}
+            </span>
+          </div>
+        );
+      }
+
+      // Texto normal com formatação inline
+      return (
+        <div key={lineIndex} className="message-paragraph">
+          {processInlineFormatting(trimmedLine)}
+        </div>
+      );
+    });
+  };
+
+  // Função para processar formatação inline (negrito, etc.)
+  const processInlineFormatting = (text) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+
+    return parts.map((part, index) => {
+      if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+        const boldText = part.slice(2, -2);
+        return <strong key={index}>{boldText}</strong>;
+      }
+      return part;
+    });
+  };
+
+  function handleFileUploaded(
+    documentId,
+    fileName,
+    templateId,
+    templateInstruction,
+    autoSend = true,
+    isHidden = false
+  ) {
     setShowAddFileModal(false);
 
-    alert(
-      `Arquivo "${fileName}" Digite suas instruções.`
-    );
+    if (templateInstruction) {
+      if (autoSend) {
+        // Envio automático (não usado mais)
+        handleAutoSendTemplate(null, fileName, templateInstruction);
+      } else {
+        if (isHidden) {
+          // Instruções ocultas - adiciona ao array de templates
+          setAttachedTemplates((prev) => [
+            ...prev,
+            {
+              id: templateId,
+              name: fileName,
+              instructions: templateInstruction,
+            },
+          ]);
+          setCurrentMessage(""); // Campo vazio para o usuário digitar
+        } else {
+          // Instruções visíveis normais
+          setCurrentMessage(templateInstruction);
+          alert(
+            `Template "${fileName}" adicionado ao chat! Complete com seu contexto específico (ex: "sobre energias renováveis") antes de enviar.`
+          );
+        }
+      }
+    } else {
+      // Arquivo sem template - adiciona ao array de arquivos
+      setAttachedFiles((prev) => [...prev, { id: documentId, name: fileName }]);
+      alert(`Arquivo "${fileName}" anexado! Digite suas instruções.`);
+    }
+  }
+
+  // Função para remover template antes de enviar
+  function handleRemoveTemplate(templateId) {
+    setAttachedTemplates((prev) => prev.filter((t) => t.id !== templateId));
+  }
+
+  // Função para remover arquivo antes de enviar
+  function handleRemoveFile(fileId) {
+    setAttachedFiles((prev) => prev.filter((f) => f.id !== fileId));
+  }
+
+  // Função para limpar todos os anexos após enviar mensagem
+  function handleClearAllAttachments() {
+    setAttachedFiles([]);
+    setAttachedTemplates([]);
+  }
+
+  // Função para enviar automaticamente mensagem com template
+  async function handleAutoSendTemplate(templateId, fileName, prompt) {
+    if (!activeConversation) return;
+
+    try {
+      // Adicionar mensagem do usuário
+      const userMessage = {
+        role: "user",
+        sender: "user",
+        content: prompt,
+        id: crypto.randomUUID(),
+        attachedTemplateId: templateId,
+        attachedFileName: fileName,
+      };
+
+      setMessages((prev) => [...prev, userMessage]);
+
+      // Enviar para API - backend identifica template pelo nome no prompt
+      const conversationId = activeConversation?._id || activeConversation?.id;
+      const data = await api.sendMessage(prompt, conversationId, null, null);
+
+      // Adicionar resposta da IA
+      const botMessage = {
+        role: "assistant",
+        sender: "bot",
+        content:
+          data?.message_content ||
+          data?.content ||
+          "Template processado com sucesso!",
+        id: crypto.randomUUID(),
+        generated_document_id: data?.document_id,
+      };
+
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (err) {
+      console.error("Erro ao processar template:", err);
+      const errorMessage = {
+        role: "assistant",
+        sender: "bot",
+        content: "Erro ao processar o template. Tente novamente.",
+        id: crypto.randomUUID(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    }
   }
 
   return (
     <div className="chat-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <h1 className="logo">
-          TPF<span>-AI</span>
-        </h1>
+        <div className="logo">
+          <Image
+            src="/TPF-AI.png"
+            alt="TPF-AI Logo"
+            width={120}
+            height={40}
+            priority
+          />
+        </div>
 
         <button
           className="new-chat"
@@ -165,8 +366,9 @@ export default function ChatPage() {
             try {
               setActiveConversation(null);
               setMessages([]);
-              setAttachedDocumentId(null);
-              setAttachedFileName(null);
+              setAttachedFiles([]);
+              setAttachedTemplates([]);
+              setCurrentMessage(""); // Limpar mensagem atual ao criar nova conversa
 
               const apiResponse = await api.sendMessage("Novo chat iniciado");
 
@@ -233,55 +435,68 @@ export default function ChatPage() {
 
       {/* Chat principal */}
       <main className="chat-main">
-        <div className="chat-messages" ref={chatContainerRef}>
-          {messages.map((msg) => {
-            let parsed = null;
+        <div className="chat-messages-wrapper">
+          <div className="chat-messages" ref={chatContainerRef}>
+            {messages.map((msg) => {
+              let parsed = null;
 
-            // converter o conteúdo em JSON para uma mensagem
-            try {
-              parsed = JSON.parse(msg.content);
-            } catch {
-              parsed = null;
-            }
+              // converter o conteúdo em JSON para uma mensagem
+              try {
+                parsed = JSON.parse(msg.content);
+              } catch {
+                parsed = null;
+              }
 
-            // Define o conteúdo que será exibido (tratando no JSON )
-            const displayContent =
-              parsed && parsed.status === "success" && parsed.message
-                ? parsed.message
-                : msg.content;
+              // Define o conteúdo que será exibido (tratando no JSON )
+              const displayContent =
+                parsed && parsed.status === "success" && parsed.message
+                  ? parsed.message
+                  : msg.content;
 
-            // Define o ID do documento
-            const documentId =
-              (parsed && parsed.document_id) ||
-              msg.document_id ||
-              msg.generated_document_id;
+              // Aplicar formatação apenas para mensagens da IA
+              const formattedContent =
+                msg.role === "assistant" || msg.sender === "bot"
+                  ? formatMessageContent(displayContent)
+                  : displayContent;
 
-            return (
-              <div
-                key={msg._id || msg.id}
-                className={`message-bubble ${msg.role === "user" || msg.sender === "user" ? "user" : "bot"
+              // Define o ID do documento
+              const documentId =
+                (parsed && parsed.document_id) ||
+                msg.document_id ||
+                msg.generated_document_id;
+
+              return (
+                <div
+                  key={msg._id || msg.id}
+                  className={`message-bubble ${
+                    msg.role === "user" || msg.sender === "user"
+                      ? "user"
+                      : "bot"
                   }`}
-              >
-                <div className="message-content">{displayContent}</div>
+                >
+                  <div className="message-content">{formattedContent}</div>
 
-                {/* Exibe botão de download apenas se ouver o id do documento */}
-                {msg.role !== "user" && documentId && (
-                  <div className="document-download-container">
-                    <DocumentLink documentId={documentId} />
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  {/* Exibe botão de download apenas se ouver o id do documento */}
+                  {msg.role !== "user" && documentId && (
+                    <div className="document-download-container">
+                      <DocumentLink documentId={documentId} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
-
 
         <InputChat
           activeConversation={activeConversation}
           onMessageSent={handleNewMessage}
           onOpenAddFileModal={() => setShowAddFileModal(true)}
           attachedDocumentId={attachedDocumentId}
-          setAttachedDocumentId={setAttachedDocumentId}
+          setAttachedDocumentId={(id) => {
+            if (id === null) setAttachedFiles([]);
+            else setAttachedFiles([{ id, name: attachedFileName }]);
+          }}
           attachedFileName={attachedFileName}
           setAttachedFileName={setAttachedFileName}
           
@@ -303,7 +518,7 @@ export default function ChatPage() {
       )}
 
       {showAddFileModal && (
-        <AddFileModal
+        <EnhancedAddFileModal
           onClose={() => setShowAddFileModal(false)}
           activeConversation={activeConversation}
           onFileUploaded={handleFileUploaded}

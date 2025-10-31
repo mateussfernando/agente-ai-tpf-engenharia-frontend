@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiSend, FiPlus } from "react-icons/fi";
 import { api } from "../../api/Api";
-import File from "./File";
+import AttachmentChips from "./AttachmentChips";
 import "../../style/chat.css";
 
 export default function InputChat({
@@ -12,19 +12,44 @@ export default function InputChat({
   setAttachedDocumentId,
   attachedFileName,
   setAttachedFileName,
+  initialMessage = "",
+  onMessageChange,
+  hiddenTemplateInstructions = "",
+  setHiddenTemplateInstructions,
+  attachedTemplates = [], // Array de templates
+  attachedFiles = [], // Array de arquivos
+  onRemoveTemplate,
+  onRemoveFile,
+  onClearAllAttachments, // Nova prop para limpar tudo após envio
 }) {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(initialMessage);
   const [isSending, setIsSending] = useState(false);
+
+  // Atualizar mensagem quando initialMessage mudar
+  useEffect(() => {
+    if (initialMessage !== message) {
+      setMessage(initialMessage);
+    }
+  }, [initialMessage]);
 
   const sendMessage = async () => {
     const userPrompt = message.trim();
-    if (!activeConversation || (!userPrompt && !attachedDocumentId) || isSending)
+    if (
+      !activeConversation ||
+      (!userPrompt && !attachedDocumentId) ||
+      isSending
+    )
       return;
 
     setIsSending(true);
 
     try {
-      // Enviar mensagem do usuário
+      // Combinar instruções ocultas do template com a mensagem do usuário
+      const finalPrompt = hiddenTemplateInstructions
+        ? `${hiddenTemplateInstructions}. ${userPrompt}`
+        : userPrompt || "Processar este arquivo";
+
+      // Enviar mensagem do usuário (mostra apenas o que o usuário digitou)
       onMessageSent?.({
         role: "user",
         sender: "user",
@@ -41,23 +66,25 @@ export default function InputChat({
 
       // Enviar para API
       const data = await api.sendMessage(
-        userPrompt || "Processar este arquivo",
+        finalPrompt,
         conversationId,
         attachedDocumentId
       );
 
       // Limpar anexos após envio
-      setAttachedDocumentId(null);
-      setAttachedFileName(null);
+      if (onClearAllAttachments) {
+        onClearAllAttachments();
+      } else {
+        // Fallback para compatibilidade
+        setAttachedDocumentId(null);
+        setAttachedFileName(null);
+      }
 
       // Mostrar resposta do bot
       onMessageSent?.({
         role: "assistant",
         sender: "bot",
-        content:
-          data?.message_content ||
-          data?.content ||
-          "Aguarde um pouco.",
+        content: data?.message_content || data?.content || "Aguarde um pouco.",
         id: crypto.randomUUID(),
         generated_document_id: data?.document_id,
       });
@@ -119,7 +146,10 @@ export default function InputChat({
           type="text"
           placeholder={getPlaceholderText()}
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => {
+            setMessage(e.target.value);
+            onMessageChange?.(e.target.value);
+          }}
           onKeyDown={handleKeyDown}
           disabled={isSending}
         />

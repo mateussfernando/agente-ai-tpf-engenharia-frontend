@@ -29,7 +29,8 @@ export default function EnhancedAddFileModal({
   const getHiddenInstructions = (template) => {
     // Se o template trouxer um tipo explícito (ex: template.type), usar.
     // Caso contrário, usar a instrução de leitura padrão 'pdf'.
-    const type = (template && (template.type || template.instructionType)) || "pdf";
+    const type =
+      (template && (template.type || template.instructionType)) || "pdf";
 
     const categoryMap = {
       pdf: "documentTemplates",
@@ -255,7 +256,8 @@ export default function EnhancedAddFileModal({
                   <div className="template-action-info">
                     <small>
                       💡 O arquivo será preparado para leitura (tipo definido
-                      pelo template). Adicione suas instruções específicas no chat.
+                      pelo template). Adicione suas instruções específicas no
+                      chat.
                     </small>
                   </div>
                   <button

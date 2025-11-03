@@ -169,25 +169,25 @@ export default function InputChat({
           disabled={isSending}
         />
 
-          {/* Seletor de formato de resposta */}
-          <div className="response-format-selector-floating">
-            <label className="response-format-label" htmlFor="response-format">
-              Formato:
-            </label>
-            <select
-              id="response-format"
-              className="response-format-select"
-              value={selectedFormat}
-              onChange={(e) => setSelectedFormat(e.target.value)}
-              disabled={isSending}
-              title="Escolher formato de resposta"
-            >
-              <option value="text">Texto</option>
-              <option value="toPdf">PDF</option>
-              <option value="toDocx">Word (DOCX)</option>
-              <option value="toExcel">Excel</option>
-            </select>
-          </div>
+        {/* Seletor de formato de resposta */}
+        <div className="response-format-selector-floating">
+          <label className="response-format-label" htmlFor="response-format">
+            Formato:
+          </label>
+          <select
+            id="response-format"
+            className="response-format-select"
+            value={selectedFormat}
+            onChange={(e) => setSelectedFormat(e.target.value)}
+            disabled={isSending}
+            title="Escolher formato de resposta"
+          >
+            <option value="text">Texto</option>
+            <option value="toPdf">PDF</option>
+            <option value="toDocx">Word (DOCX)</option>
+            <option value="toExcel">Excel</option>
+          </select>
+        </div>
 
         <button
           className={`send-btn ${message.trim() ? "active" : ""}`}

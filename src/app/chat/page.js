@@ -293,6 +293,20 @@ export default function ChatPage() {
     setAttachedFiles((prev) => prev.filter((f) => f.id !== fileId));
   }
 
+  // Função para setar apenas o nome do arquivo anexado (compatibilidade)
+  function setAttachedFileName(name) {
+    if (name === null) {
+      setAttachedFiles([]);
+      return;
+    }
+
+    setAttachedFiles((prev) => {
+      if (!prev || prev.length === 0) return prev;
+      // Atualiza o nome do primeiro arquivo anexado
+      return [{ id: prev[0].id, name }, ...prev.slice(1)];
+    });
+  }
+
   // Função para limpar todos os anexos após enviar mensagem
   function handleClearAllAttachments() {
     setAttachedFiles([]);
@@ -498,7 +512,6 @@ export default function ChatPage() {
           }}
           attachedFileName={attachedFileName}
           setAttachedFileName={setAttachedFileName}
-          
         />
       </main>
 

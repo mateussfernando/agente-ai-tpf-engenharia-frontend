@@ -5,9 +5,9 @@ import {
   MdDescription,
   MdAutoFixHigh,
 } from "react-icons/md";
-import { api } from "../../api/Api";
-import instructions from "../../utils/Instructions";
-import "../../style/add-file.css";
+import { api } from "../../../api/Api";
+import instructions from "../../../utils/Instructions";
+import "../../../style/add-file.css";
 
 export default function EnhancedAddFileModal({
   onFileUploaded,
@@ -22,29 +22,10 @@ export default function EnhancedAddFileModal({
   // Estados para templates
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
-  // Não expor seleção de tipo de processamento ao usuário.
-  // O tipo será determinado pelo template (se houver) ou usado como 'pdf' por padrão.
-
-  // Obter instruções do arquivo centralizado
-  const getHiddenInstructions = (template) => {
-    // Se o template trouxer um tipo explícito (ex: template.type), usar.
-    // Caso contrário, usar a instrução de leitura padrão 'pdf'.
-    const type = (template && (template.type || template.instructionType)) || "pdf";
-
-    const categoryMap = {
-      pdf: "documentTemplates",
-      technicalAnalysis: "documentTemplates",
-      executiveSummary: "documentTemplates",
-      dataExtraction: "documentTemplates",
-      toPdf: "conversionInstructions",
-      toDocx: "conversionInstructions",
-      toExcel: "conversionInstructions",
-    };
-
-    const category = categoryMap[type] || "documentTemplates";
-    const instruction = instructions.getInstruction(category, type);
-
-    return instruction;
+  // Obter instrução padrão do arquivo centralizado
+  const getHiddenInstructions = (templateName) => {
+    // Sempre retorna a instrução padrão de leitura
+    return instructions.getInstruction("documentTemplates", "pdf");
   };
 
   // Carregar templates ao abrir o modal
@@ -121,18 +102,18 @@ export default function EnhancedAddFileModal({
       return;
     }
 
-    // Buscar instruções do arquivo centralizado (tipo vindo do próprio template ou padrão)
-    const hiddenInstructions = getHiddenInstructions(selectedTemplate);
+    // Buscar instrução padrão
+    const hiddenInstructions = getHiddenInstructions(selectedTemplate.filename);
 
     if (onFileUploaded) {
-      // Passa as instruções ocultas para serem adicionadas ao input
+      // Passa a instrução oculta padrão para o input
       onFileUploaded(
         null,
         selectedTemplate.filename,
         null,
         hiddenInstructions,
-        false, // nunca enviar automaticamente
-        true // indica que são instruções ocultas
+        false,
+        true
       );
     }
 
@@ -254,8 +235,8 @@ export default function EnhancedAddFileModal({
                 <div className="template-actions">
                   <div className="template-action-info">
                     <small>
-                      💡 O arquivo será preparado para leitura (tipo definido
-                      pelo template). Adicione suas instruções específicas no chat.
+                      💡 O arquivo será preparado para leitura. Adicione suas
+                      instruções específicas no chat.
                     </small>
                   </div>
                   <button

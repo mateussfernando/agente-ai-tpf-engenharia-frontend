@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { FiSend, FiPlus } from "react-icons/fi";
 import { api } from "../../api/Api";
+import instructions from "../../utils/Instructions";
 import AttachmentChips from "./AttachmentChips";
 import "../../style/chat.css";
+import "../../style/response-format-selector.css";
 
 export default function InputChat({
   activeConversation,
@@ -24,6 +26,7 @@ export default function InputChat({
 }) {
   const [message, setMessage] = useState(initialMessage);
   const [isSending, setIsSending] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState("text");
 
   // Atualizar mensagem quando initialMessage mudar
   useEffect(() => {
@@ -45,9 +48,21 @@ export default function InputChat({
 
     try {
       // Combinar instruções ocultas do template com a mensagem do usuário
-      const finalPrompt = hiddenTemplateInstructions
-        ? `${hiddenTemplateInstructions}. ${userPrompt}`
-        : userPrompt || "Processar este arquivo";
+      // e adicionar instrução de conversão caso o usuário tenha escolhido um formato
+      let conversionInstruction = "";
+      if (selectedFormat && selectedFormat !== "text") {
+        conversionInstruction = instructions.getInstruction(
+          "conversionInstructions",
+          selectedFormat
+        );
+      }
+
+      const parts = [];
+      if (hiddenTemplateInstructions) parts.push(hiddenTemplateInstructions);
+      if (conversionInstruction) parts.push(conversionInstruction);
+      if (userPrompt) parts.push(userPrompt);
+
+      const finalPrompt = parts.join(". ") || "Processar este arquivo";
 
       // Enviar mensagem do usuário (mostra apenas o que o usuário digitou)
       onMessageSent?.({
@@ -153,6 +168,26 @@ export default function InputChat({
           onKeyDown={handleKeyDown}
           disabled={isSending}
         />
+
+          {/* Seletor de formato de resposta */}
+          <div className="response-format-selector-floating">
+            <label className="response-format-label" htmlFor="response-format">
+              Formato:
+            </label>
+            <select
+              id="response-format"
+              className="response-format-select"
+              value={selectedFormat}
+              onChange={(e) => setSelectedFormat(e.target.value)}
+              disabled={isSending}
+              title="Escolher formato de resposta"
+            >
+              <option value="text">Texto</option>
+              <option value="toPdf">PDF</option>
+              <option value="toDocx">Word (DOCX)</option>
+              <option value="toExcel">Excel</option>
+            </select>
+          </div>
 
         <button
           className={`send-btn ${message.trim() ? "active" : ""}`}

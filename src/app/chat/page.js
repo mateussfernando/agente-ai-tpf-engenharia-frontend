@@ -43,7 +43,6 @@ export default function ChatPage() {
     .join(". ");
 
   const chatContainerRef = useRef(null);
-  const [currentMessage, setCurrentMessage] = useState("");
 
   // Carrega conversas e usuário ao abrir
   useEffect(() => {

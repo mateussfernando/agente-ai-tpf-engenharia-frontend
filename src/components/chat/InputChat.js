@@ -137,12 +137,13 @@ export default function InputChat({
 
   return (
     <div className="chat-input-container">
-      {attachedDocumentId && (
+      {(attachedTemplates?.length > 0 || attachedFiles?.length > 0 || attachedDocumentId) && (
         <div className="attachment-preview">
-          <File
-            documentId={attachedDocumentId}
-            fileName={attachedFileName}
-            onRemove={handleRemoveAttachment}
+          <AttachmentChips
+            templates={attachedTemplates}
+            files={attachedFiles}
+            onRemoveTemplate={onRemoveTemplate}
+            onRemoveFile={onRemoveFile}
           />
         </div>
       )}

@@ -481,11 +481,10 @@ export default function ChatPage() {
               return (
                 <div
                   key={msg._id || msg.id}
-                  className={`message-bubble ${
-                    msg.role === "user" || msg.sender === "user"
-                      ? "user"
-                      : "bot"
-                  }`}
+                  className={`message-bubble ${msg.role === "user" || msg.sender === "user"
+                    ? "user"
+                    : "bot"
+                    }`}
                 >
                   <div className="message-content">{formattedContent}</div>
 
@@ -503,17 +502,17 @@ export default function ChatPage() {
 
         <InputChat
           activeConversation={activeConversation}
-          onMessageSent={handleNewMessage}
-          onOpenAddFileModal={() => setShowAddFileModal(true)}
+          onMessageSent={handleNewMessage} onOpenAddFileModal={() => setShowAddFileModal(true)}
           attachedDocumentId={attachedDocumentId}
           setAttachedDocumentId={(id) => {
             if (id === null) setAttachedFiles([]);
             else setAttachedFiles([{ id, name: attachedFileName }]);
           }}
-          attachedFileName={attachedFileName}
-          setAttachedFileName={setAttachedFileName}
-        />
-      </main>
+          attachedTemplates={attachedTemplates}
+          attachedFiles={attachedFiles}
+          onRemoveTemplate={handleRemoveTemplate}
+          onRemoveFile={handleRemoveFile}
+          onClearAllAttachments={handleClearAllAttachments} /> </main>
 
       {/* Modais */}
       {modal && modal.chat && (

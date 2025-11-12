@@ -69,14 +69,16 @@ body {
   position: relative;
   z-index: 10;
 }
-.chat-input input {
+.chat-input textarea {
   flex: 1;
   color: #000000;
   border: none;
   outline: none;
+  margin-bottom: -19px;
   font-size: 16px;
-  padding: 10px;
+  padding: 5px;
   background: white;
+
 }
 
 .add-file-btn {

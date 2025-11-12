@@ -3,6 +3,7 @@
   margin: 0.2rem 0;
   border-radius: 8px;
   display: flex;
+  overflow: hidden;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;

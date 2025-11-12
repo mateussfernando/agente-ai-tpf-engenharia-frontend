@@ -59,18 +59,15 @@ export default function ChatPage() {
         setConversations(convData);
         setUser({ name: userData.name, email: userData.email });
 
-        if (convData.length) selectConversation(convData[0]);
-        else {
-          const newConvData = await api.sendMessage("Olá, TPF-AI!");
-          setConversations((prev) => [newConvData.conversation, ...prev]);
-          selectConversation(newConvData.conversation);
-        }
+        // Não seleciona nenhuma conversa
+        // Não cria conversa automaticamente
       } catch (err) {
         console.error("Erro ao carregar chat:", err.message);
       }
     };
     load();
   }, []);
+
 
   useEffect(() => {
     if (chatContainerRef.current)
@@ -94,6 +91,23 @@ export default function ChatPage() {
     }
   };
 
+ async function ensureConversation(userMessageContent) {
+    if (activeConversation) return { conversation: activeConversation, response: {} }; // Retorna objeto também se já existir
+
+    // Esta é a chamada crítica que CRIA a conversa E envia a primeira mensagem
+    const newConvResponse = await api.sendMessage(userMessageContent); 
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    const convId = newConvResponse.conversation_id;
+
+    const updatedList = await api.getConversations();
+    setConversations(updatedList);
+
+    const newConv = updatedList.find((c) => c._id === convId);
+    setActiveConversation(newConv);
+
+    // RETORNA UM OBJETO COM A CONVERSA E A RESPOSTA DO BACKEND
+    return { conversation: newConv, response: newConvResponse }; 
+}
   // Funções de renomear e excluir
   const handleRenameConversation = async (conversationId, newTitle) => {
     if (!conversationId || !newTitle) return alert("Título obrigatório");
@@ -135,24 +149,19 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, msg]);
 
     // Se for uma mensagem do bot e há uma conversa ativa, recarregar o histórico
-    if (
-      (msg.role === "assistant" || msg.sender === "bot") &&
-      activeConversation
-    ) {
-      try {
-        // Aguardar um pouco para garantir que a API processou a mensagem
-        setTimeout(async () => {
-          console.log("Recarregando histórico da conversa..."); // Para debug
-          const history = await api.getConversationHistory(
-            activeConversation._id || activeConversation.id
-          );
-          console.log("Histórico carregado:", history); // Para debug
-          setMessages(history || []);
-        }, 1000);
-      } catch (err) {
-        console.error("Erro ao recarregar histórico:", err);
-      }
-    }
+    if (msg.role === "assistant" || msg.sender === "bot") {
+  const convId = activeConversation?._id || activeConversation?.id || msg.conversation_id;
+  if (!convId) return; // ainda não tem conversa ativa
+
+  try {
+    setTimeout(async () => {
+      const history = await api.getConversationHistory(convId);
+      setMessages(history || []);
+    }, 1000);
+  } catch (err) {
+    console.error("Erro ao recarregar histórico:", err);
+  }
+}
   };
   const closeModal = () => setModal(null);
   const onLogout = () => (window.location.href = "/auth/login");
@@ -375,36 +384,12 @@ export default function ChatPage() {
 
         <button
           className="new-chat"
-          onClick={async () => {
-            try {
-              setActiveConversation(null);
-              setMessages([]);
-              setAttachedFiles([]);
-              setAttachedTemplates([]);
-              setCurrentMessage(""); // Limpar mensagem atual ao criar nova conversa
-
-              const apiResponse = await api.sendMessage("Novo chat iniciado");
-
-              if (!apiResponse || !apiResponse.conversation_id) {
-                throw new Error("API não retornou o ID da nova conversa.");
-              }
-              const newConvList = await api.getConversations();
-              const newConversation =
-                newConvList.find(
-                  (c) => c._id === apiResponse.conversation_id
-                ) || newConvList[0];
-
-              if (!newConversation) {
-                throw new Error(
-                  "Falha ao recuperar os dados da nova conversa."
-                );
-              }
-
-              setConversations(newConvList);
-              selectConversation(newConversation);
-            } catch (err) {
-              console.error("Erro ao criar novo chat:", err.message);
-            }
+          onClick={() => {
+            setActiveConversation(null);
+            setMessages([]);
+            setAttachedFiles([]);
+            setAttachedTemplates([]);
+            setCurrentMessage("");
           }}
         >
           + Novo Chat
@@ -502,6 +487,7 @@ export default function ChatPage() {
 
         <InputChat
           activeConversation={activeConversation}
+          ensureConversation={ensureConversation}
           onMessageSent={handleNewMessage} onOpenAddFileModal={() => setShowAddFileModal(true)}
           attachedDocumentId={attachedDocumentId}
           setAttachedDocumentId={(id) => {

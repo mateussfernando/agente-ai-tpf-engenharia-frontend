@@ -8,6 +8,7 @@ import "../../style/response-format-selector.css";
 
 export default function InputChat({
   activeConversation,
+  ensureConversation,
   onOpenAddFileModal,
   onMessageSent,
   attachedDocumentId,
@@ -35,87 +36,98 @@ export default function InputChat({
     }
   }, [initialMessage]);
 
-  const sendMessage = async () => {
+const sendMessage = async () => {
     const userPrompt = message.trim();
-    if (
-      !activeConversation ||
-      (!userPrompt && !attachedDocumentId) ||
-      isSending
-    )
-      return;
+    if ((!userPrompt && !attachedDocumentId) || isSending) return;
 
     setIsSending(true);
 
     try {
-      // Combinar instruções ocultas do template com a mensagem do usuário
-      // e adicionar instrução de conversão caso o usuário tenha escolhido um formato
-      let conversionInstruction = "";
-      if (selectedFormat && selectedFormat !== "text") {
-        conversionInstruction = instructions.getInstruction(
-          "conversionInstructions",
-          selectedFormat
-        );
-      }
+        let conversionInstruction = "";
+        if (selectedFormat && selectedFormat !== "text") {
+            conversionInstruction = instructions.getInstruction(
+                "conversionInstructions",
+                selectedFormat
+            );
+        }
 
-      const parts = [];
-      if (hiddenTemplateInstructions) parts.push(hiddenTemplateInstructions);
-      if (conversionInstruction) parts.push(conversionInstruction);
-      if (userPrompt) parts.push(userPrompt);
+        const parts = [];
+        if (hiddenTemplateInstructions) parts.push(hiddenTemplateInstructions);
+        if (conversionInstruction) parts.push(conversionInstruction);
+        if (userPrompt) parts.push(userPrompt);
 
-      const finalPrompt = parts.join(". ") || "Processar este arquivo";
+        const finalPrompt = parts.join(". ") || "Processar este arquivo";
 
-      // Enviar mensagem do usuário (mostra apenas o que o usuário digitou)
-      onMessageSent?.({
-        role: "user",
-        sender: "user",
-        content: userPrompt || "Processar arquivo",
-        id: crypto.randomUUID(),
-        attachedDocumentId,
-        attachedFileName,
-      });
+        // Variáveis para armazenar o ID da conversa e os dados da resposta
+        let conversationId;
+        let responseData;
+        
+        if (activeConversation) {
+            
+            conversationId = activeConversation._id || activeConversation.id;
+            
+            onMessageSent?.({
+                role: "user",
+                sender: "user",
+                content: userPrompt || "Processar arquivo",
+                id: crypto.randomUUID(),
+                attachedDocumentId,
+                attachedFileName,
+            });
+            setMessage(""); // Limpar input
+            
+            responseData = await api.sendMessage(
+                finalPrompt,
+                conversationId,
+                attachedDocumentId
+            );
 
-      const conversationId = activeConversation?._id || activeConversation?.id;
+        } else {
+            onMessageSent?.({
+                role: "user",
+                sender: "user",
+                content: userPrompt || "Processar arquivo",
+                id: crypto.randomUUID(),
+                attachedDocumentId,
+                attachedFileName,
+            });
+            setMessage(""); // Limpar input
 
-      // Limpa o input imediatamente após enviar
-      setMessage("");
+            const result = await ensureConversation(finalPrompt); 
+            conversationId = result.conversation?._id || result.conversation?.id;
+            responseData = result.response;
+        }
 
-      // Enviar para API
-      const data = await api.sendMessage(
-        finalPrompt,
-        conversationId,
-        attachedDocumentId
-      );
+        // Limpar anexos após envio
+        if (onClearAllAttachments) {
+            onClearAllAttachments();
+        } else {
+            setAttachedDocumentId(null);
+        }
 
-      // Limpar anexos após envio
-      if (onClearAllAttachments) {
-        onClearAllAttachments();
-      } else {
-        // Fallback para compatibilidade
-        setAttachedDocumentId(null);
-        setAttachedFileName(null);
-      }
-
-      // Mostrar resposta do bot
-      onMessageSent?.({
-        role: "assistant",
-        sender: "bot",
-        content: data?.message_content || data?.content || "Aguarde um pouco.",
-        id: crypto.randomUUID(),
-        generated_document_id: data?.document_id,
-      });
+        // Mostrar resposta do bot, usando os dados da resposta (responseData) obtidos no fluxo 1 ou 2
+        onMessageSent?.({
+            role: "assistant",
+            sender: "bot",
+            content: responseData?.message_content || responseData?.content || "Aguarde um pouco.",
+            id: crypto.randomUUID(),
+            generated_document_id: responseData?.document_id,
+            conversation_id: conversationId,
+        });
+        
     } catch (err) {
-      console.error("Erro ao enviar mensagem:", err);
+        console.error("Erro ao enviar mensagem:", err);
 
-      onMessageSent?.({
-        role: "assistant",
-        sender: "bot",
-        content: "Erro de conexão ou servidor. Tente novamente.",
-        id: crypto.randomUUID(),
-      });
+        onMessageSent?.({
+            role: "assistant",
+            sender: "bot",
+            content: "Erro de conexão ou servidor. Tente novamente.",
+            id: crypto.randomUUID(),
+        });
     } finally {
-      setIsSending(false);
+        setIsSending(false);
     }
-  };
+};
 
   function handleRemoveAttachment() {
     setAttachedDocumentId(null);
@@ -158,8 +170,7 @@ export default function InputChat({
           <FiPlus className={attachedDocumentId ? "attached-icon" : ""} />
         </button>
 
-        <input
-          type="text"
+        <textarea
           placeholder={getPlaceholderText()}
           value={message}
           onChange={(e) => {

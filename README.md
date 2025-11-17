@@ -48,8 +48,10 @@ Siga os passos abaixo para ter o TPF-AI rodando localmente em sua máquina.
 Para começar, clone o repositório utilizando o Git:
 
 ```bash
-git clone [https://github.com/seu-usuario/agente-ai-tpf-engenharia-frontend.git](https://github.com/seu-usuario/agente-ai-tpf-engenharia-frontend.git)
-cd agente-tpf-ai
+git clone [https://github.com/seu-usuario/agente-ai-tpf-engenharia-frontend.git]
+
+(https://github.com/seu-usuario/agente-ai-tpf-engenharia-frontend.git)
+cd agente-ai-tpf-engenharia-frontend
 ```
 
 ## Instalando Dependências

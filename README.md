@@ -41,16 +41,17 @@ Este projeto foi construído utilizando as seguintes tecnologias:
 
 ## ⚙️ Como Rodar o Projeto
 
-Siga os passos abaixo para ter o TPF-AI rodando localmente em sua máquina.
+Siga os passos abaixo para ter o projeto  rodando localmente em sua máquina.
 
 ### 1. Clonando o Repositório
 
 Para começar, clone o repositório utilizando o Git:
 
 ```bash
-git clone [https://github.com/seu-usuario/agente-ai-tpf-engenharia-frontend.git]
+# 1. Clonar o repositório
+git clone https://github.com/seu-usuario/agente-ai-tpf-engenharia-frontend.git
 
-(https://github.com/seu-usuario/agente-ai-tpf-engenharia-frontend.git)
+# 2. Acessar a pasta do projeto
 cd agente-ai-tpf-engenharia-frontend
 ```
 

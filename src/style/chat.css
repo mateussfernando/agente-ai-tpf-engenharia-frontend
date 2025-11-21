@@ -37,6 +37,22 @@ body {
   padding: 10px;
 }
 
+.initial-message {
+  text-align: center;
+  color: #ffffff;
+  padding: 40px 20px;
+  opacity: 0.9;
+}
+
+.initial-message h2 {
+  font-size: 22px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.initial-message p {
+  font-size: 16px;
+}
 /* Baixar arquivo */
 .document-download-container {
   margin-top: 5px;

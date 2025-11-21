@@ -27,6 +27,8 @@ export default function ChatPage() {
   // Estados para gerenciar os anexos (agora como arrays para múltiplos)
   const [attachedFiles, setAttachedFiles] = useState([]); // Array de {id, name}
   const [attachedTemplates, setAttachedTemplates] = useState([]); // Array de {id, name, instructions}
+  const [isLoadingConversation, setIsLoadingConversation] = useState(true);
+
 
   // Estado para a mensagem atual do input
   const [currentMessage, setCurrentMessage] = useState("");
@@ -56,18 +58,27 @@ export default function ChatPage() {
           api.getProfile(),
         ]);
 
-        setConversations(convData);
         setUser({ name: userData.name, email: userData.email });
+        setConversations(convData);
 
-        // Não seleciona nenhuma conversa
-        // Não cria conversa automaticamente
+        const lastId = localStorage.getItem("lastConversationId");
+        if (lastId) {
+          const lastConv = convData.find((c) => c._id === lastId);
+
+          if (lastConv) {
+            await selectConversation(lastConv, true); // <- NOVO
+          }
+        }
+
       } catch (err) {
         console.error("Erro ao carregar chat:", err.message);
+      } finally {
+        setIsLoadingConversation(false); // <- desbloqueia UI
       }
     };
+
     load();
   }, []);
-
 
   useEffect(() => {
     if (chatContainerRef.current)
@@ -77,37 +88,35 @@ export default function ChatPage() {
 
   // Função para selecionar uma conversa
   const selectConversation = async (conversation) => {
+    setIsLoadingConversation(true); // inicia loading
+
+    localStorage.setItem(
+      "lastConversationId",
+      conversation._id || conversation.id
+    );
+
     setActiveConversation(conversation);
     setAttachedFiles([]);
     setAttachedTemplates([]);
-    setCurrentMessage(""); // Limpar mensagem atual ao trocar conversa
+    setCurrentMessage("");
+
     try {
       const history = await api.getConversationHistory(
         conversation._id || conversation.id
       );
+
       setMessages(history || []);
     } catch {
       setMessages([]);
     }
+
+    setIsLoadingConversation(false); // encerra loading
   };
 
- async function ensureConversation(userMessageContent) {
-    if (activeConversation) return { conversation: activeConversation, response: {} }; // Retorna objeto também se já existir
 
-    // Esta é a chamada crítica que CRIA a conversa E envia a primeira mensagem
-    const newConvResponse = await api.sendMessage(userMessageContent); 
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    const convId = newConvResponse.conversation_id;
-
-    const updatedList = await api.getConversations();
-    setConversations(updatedList);
-
-    const newConv = updatedList.find((c) => c._id === convId);
-    setActiveConversation(newConv);
-
-    // RETORNA UM OBJETO COM A CONVERSA E A RESPOSTA DO BACKEND
-    return { conversation: newConv, response: newConvResponse }; 
-}
+  async function ensureConversation() {
+    return activeConversation;
+  }
   // Funções de renomear e excluir
   const handleRenameConversation = async (conversationId, newTitle) => {
     if (!conversationId || !newTitle) return alert("Título obrigatório");
@@ -150,18 +159,22 @@ export default function ChatPage() {
 
     // Se for uma mensagem do bot e há uma conversa ativa, recarregar o histórico
     if (msg.role === "assistant" || msg.sender === "bot") {
-  const convId = activeConversation?._id || activeConversation?.id || msg.conversation_id;
-  if (!convId) return; // ainda não tem conversa ativa
+      const convId = activeConversation?._id || activeConversation?.id || msg.conversation_id;
+      if (!convId) return; // ainda não tem conversa ativa
 
-  try {
-    setTimeout(async () => {
-      const history = await api.getConversationHistory(convId);
-      setMessages(history || []);
-    }, 1000);
-  } catch (err) {
-    console.error("Erro ao recarregar histórico:", err);
-  }
-}
+      try {
+        setTimeout(async () => {
+          const history = await api.getConversationHistory(convId);
+          setMessages(history || []);
+
+          const updatedConversations = await api.getConversations();
+          setConversations(updatedConversations);
+
+        }, 1000);
+      } catch (err) {
+        console.error("Erro ao recarregar histórico:", err);
+      }
+    }
   };
   const closeModal = () => setModal(null);
   const onLogout = () => (window.location.href = "/auth/login");
@@ -384,13 +397,20 @@ export default function ChatPage() {
 
         <button
           className="new-chat"
-          onClick={() => {
-            setActiveConversation(null);
+          onClick={async () => {
+            const draft = await api.initConversation();
+
+            setActiveConversation({ _id: draft.conversation_id });
             setMessages([]);
             setAttachedFiles([]);
             setAttachedTemplates([]);
             setCurrentMessage("");
+
+            const updated = await api.getConversations();
+            setConversations(updated);;
+
           }}
+
         >
           + Novo Chat
         </button>
@@ -435,6 +455,22 @@ export default function ChatPage() {
       <main className="chat-main">
         <div className="chat-messages-wrapper">
           <div className="chat-messages" ref={chatContainerRef}>
+
+            {isLoadingConversation && (
+              <div className="initial-message">
+                <p>Carregando...</p>
+              </div>
+            )}
+
+            {!isLoadingConversation &&
+              messages.length === 0 &&
+              attachedFiles.length === 0 &&
+              attachedTemplates.length === 0 && (
+                <div className="initial-message">
+                  <h2>Como posso ajudar hoje?</h2>
+                  <p>Envie uma mensagem para começarmos.</p>
+                </div>
+              )}
             {messages.map((msg) => {
               let parsed = null;
 

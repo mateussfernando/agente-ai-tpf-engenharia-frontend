@@ -145,6 +145,30 @@ export const api = {
       }
     );
   },
+  
+  initConversation: async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`${API_BASE_URL}/api/chat/conversations/init`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Erro ao iniciar conversa");
+    }
+
+    return await response.json();
+  } catch (err) {
+    console.error("Erro na initConversation:", err);
+    throw err;
+  }
+},
 
   /** Fiz uma logica para enviar a mensagem o documento e o template */
 

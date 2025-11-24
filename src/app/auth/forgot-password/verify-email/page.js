@@ -1,9 +1,9 @@
-"use client";
-import AuthLayout from "@/components/layout/AuthLayout.js";
-import Input from "../../../../components/ui/Input.js";
-import AuthButton from "@/components/ui/AuthButton.js";
-import AuthSubtitle from "@/components/ui/AuthSubtitle.js";
-import { FiMail } from "react-icons/fi";
+'use client';
+import AuthLayout from '@/components/auth/AuthLayout.js';
+import Input from '../../../../components/auth/AuthInput.js';
+import AuthButton from '@/components/auth/AuthButton.js';
+import AuthSubtitle from '@/components/auth/AuthSubtitle.js';
+import { FiMail } from 'react-icons/fi';
 
 export default function VerifyEmail() {
   return (
@@ -22,7 +22,7 @@ export default function VerifyEmail() {
 
       <AuthButton
         onClick={() =>
-          (window.location.href = "/auth/forgot-password/confirm-code")
+          (window.location.href = '/auth/forgot-password/confirm-code')
         }
       >
         Enviar

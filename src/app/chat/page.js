@@ -5,7 +5,7 @@ import Modal from '@/components/modals/Modal';
 import SidebarItem from '@/components/chat/SidebarItem';
 import DocumentLink from '@/components/chat/DocumentLink';
 import EnhancedAddFileModal from '@/components/modals/EnhancedAddFileModal';
-import MenuPerfil from '@/components/layout/MenuPerfil';
+// Removido import do MenuPerfil
 import InputChat from '@/components/chat/InputChat';
 import { FaUserCircle } from 'react-icons/fa';
 import { api } from '@/api/Api';
@@ -443,7 +443,20 @@ export default function ChatPage() {
           </div>
           <span>{user.name}</span>
           {showMenuPerfil && (
-            <MenuPerfil onLogout={onLogout} userEmail={user.email} />
+            <div className="profile-menu">
+              <div className="profile-info">
+                <span>{user.email}</span>
+              </div>
+              <button
+                className="profile-option"
+                onClick={() => {
+                  api.logout();
+                }}
+                type="button"
+              >
+                <span>Sair</span>
+              </button>
+            </div>
           )}
         </div>
       </aside>

@@ -1,7 +1,7 @@
-"use client";
-import AuthLayout from "@/components/layout/AuthLayout.js";
-import AuthButton from "@/components/ui/AuthButton.js";
-import AlertBox from "@/components/modals/AlertBox.js";
+'use client';
+import AuthLayout from '@/components/auth/AuthLayout.js';
+import AuthButton from '@/components/auth/AuthButton.js';
+import AlertBox from '@/components/auth/AlertBox.js';
 
 export default function Success() {
   return (
@@ -10,7 +10,7 @@ export default function Success() {
         Seu cadastro foi concluído com sucesso. Faça login para acessar.
       </AlertBox>
 
-      <AuthButton onClick={() => (window.location.href = "/auth/login")}>
+      <AuthButton onClick={() => (window.location.href = '/auth/login')}>
         Voltar para o início
       </AuthButton>
     </AuthLayout>

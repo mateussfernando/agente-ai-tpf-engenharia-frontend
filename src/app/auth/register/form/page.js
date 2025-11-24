@@ -1,20 +1,20 @@
-"use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import AuthLayout from "@/components/layout/AuthLayout.js";
-import Input from "../../../../components/ui/Input.js";
-import AuthButton from "@/components/ui/AuthButton.js";
-import AuthSubtitle from "@/components/ui/AuthSubtitle.js";
-import { FiUser, FiMail, FiLock } from "react-icons/fi";
-import { api } from "@/api/Api.js";
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import AuthLayout from '@/components/auth/AuthLayout.js';
+import Input from '../../../../components/auth/AuthInput.js';
+import AuthButton from '@/components/auth/AuthButton.js';
+import AuthSubtitle from '@/components/auth/AuthSubtitle.js';
+import { FiUser, FiMail, FiLock } from 'react-icons/fi';
+import { api } from '@/api/Api.js';
 
 export default function Form() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +30,7 @@ export default function Form() {
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
-        [name]: "",
+        [name]: '',
       }));
     }
   }
@@ -40,33 +40,33 @@ export default function Form() {
 
     // Validar nome
     if (!formData.name.trim()) {
-      newErrors.name = "Nome completo é obrigatório";
+      newErrors.name = 'Nome completo é obrigatório';
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Nome deve ter pelo menos 2 caracteres";
+      newErrors.name = 'Nome deve ter pelo menos 2 caracteres';
     }
 
     // Validar email
     if (!formData.email.trim()) {
-      newErrors.email = "Email é obrigatório";
+      newErrors.email = 'Email é obrigatório';
     } else {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(formData.email)) {
-        newErrors.email = "Formato de email inválido";
+        newErrors.email = 'Formato de email inválido';
       }
     }
 
     // Validar senha
     if (!formData.password) {
-      newErrors.password = "Senha é obrigatória";
+      newErrors.password = 'Senha é obrigatória';
     } else if (formData.password.length < 6) {
-      newErrors.password = "Senha deve ter pelo menos 6 caracteres";
+      newErrors.password = 'Senha deve ter pelo menos 6 caracteres';
     }
 
     // Validar confirmação de senha
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Confirmação de senha é obrigatória";
+      newErrors.confirmPassword = 'Confirmação de senha é obrigatória';
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Senhas não coincidem";
+      newErrors.confirmPassword = 'Senhas não coincidem';
     }
 
     setErrors(newErrors);
@@ -85,21 +85,21 @@ export default function Form() {
 
     try {
       await api.register(formData.name, formData.email, formData.password);
-      router.push("/auth/register/success");
+      router.push('/auth/register/success');
     } catch (error) {
-      console.error("Erro no registro:", error);
+      console.error('Erro no registro:', error);
 
       // Verificar se é erro de email já em uso
       if (
-        error.message.includes("409") ||
-        error.message.includes("já está em uso")
+        error.message.includes('409') ||
+        error.message.includes('já está em uso')
       ) {
         setErrors({
-          email: "Este email já está em uso. Tente outro email ou faça login.",
+          email: 'Este email já está em uso. Tente outro email ou faça login.',
         });
       } else {
         setErrors({
-          submit: error.message || "Erro ao criar conta. Tente novamente.",
+          submit: error.message || 'Erro ao criar conta. Tente novamente.',
         });
       }
     } finally {
@@ -122,7 +122,7 @@ export default function Form() {
             onChange={(e) =>
               handleInputChange({
                 ...e,
-                target: { ...e.target, name: "name" },
+                target: { ...e.target, name: 'name' },
               })
             }
           />
@@ -141,7 +141,7 @@ export default function Form() {
             onChange={(e) =>
               handleInputChange({
                 ...e,
-                target: { ...e.target, name: "email" },
+                target: { ...e.target, name: 'email' },
               })
             }
           />
@@ -160,7 +160,7 @@ export default function Form() {
             onChange={(e) =>
               handleInputChange({
                 ...e,
-                target: { ...e.target, name: "password" },
+                target: { ...e.target, name: 'password' },
               })
             }
           />
@@ -179,7 +179,7 @@ export default function Form() {
             onChange={(e) =>
               handleInputChange({
                 ...e,
-                target: { ...e.target, name: "confirmPassword" },
+                target: { ...e.target, name: 'confirmPassword' },
               })
             }
           />
@@ -197,13 +197,13 @@ export default function Form() {
         )}
 
         <AuthButton type="submit" disabled={isLoading}>
-          {isLoading ? "Cadastrando..." : "Cadastrar"}
+          {isLoading ? 'Cadastrando...' : 'Cadastrar'}
         </AuthButton>
       </form>
 
       {/* Login link */}
       <p className="text-gray-400 text-sm text-center mt-6">
-        Já possui conta?{" "}
+        Já possui conta?{' '}
         <a href="/auth/login" className="text-gray-600 hover:text-gray-800">
           Faça seu login aqui
         </a>

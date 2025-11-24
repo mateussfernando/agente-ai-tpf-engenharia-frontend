@@ -215,11 +215,11 @@ export default function EnhancedAddFileModal({
           {/* Modo Template */}
           {mode === "template" && (
             <div className="template-section">
-              <p className="modal-description">
+              {/* <p className="modal-description">
                 Selecione um template e escolha o tipo de documento. A instrução
                 será adicionada ao campo de mensagem para que você possa
                 complementar com detalhes específicos antes de enviar.
-              </p>
+              </p> */}
 
               {/* Lista de templates */}
               <div className="template-list">
@@ -255,7 +255,7 @@ export default function EnhancedAddFileModal({
                 <div className="template-actions">
                   <div className="template-action-info">
                     <small>
-                      💡 O arquivo será preparado para leitura (tipo definido
+                      O arquivo será preparado para leitura (tipo definido
                       pelo template). Adicione suas instruções específicas no
                       chat.
                     </small>

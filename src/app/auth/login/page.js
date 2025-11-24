@@ -1,18 +1,18 @@
-"use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import AuthLayout from "@/components/layout/AuthLayout.js";
-import Input from "../../../components/ui/Input.js";
-import AuthButton from "@/components/ui/AuthButton.js";
-import AuthSubtitle from "@/components/ui/AuthSubtitle.js";
-import AlertBox from "@/components/modals/AlertBox.js";
-import { FiUser, FiLock } from "react-icons/fi";
-import { api } from "../../../api/Api.js";
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import AuthLayout from '@/components/auth/AuthLayout.js';
+import Input from '../../../components/auth/AuthInput.js';
+import AuthButton from '@/components/auth/AuthButton.js';
+import AuthSubtitle from '@/components/auth/AuthSubtitle.js';
+import AlertBox from '@/components/auth/AlertBox.js';
+import { FiUser, FiLock } from 'react-icons/fi';
+import { api } from '../../../api/Api.js';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -24,12 +24,12 @@ export default function LoginPage() {
       const data = await api.login(email, password);
 
       // Salva o token correto
-      localStorage.setItem("token", data.access_token);
+      localStorage.setItem('token', data.access_token);
 
-      router.push("/chat");
+      router.push('/chat');
     } catch (err) {
       setError(
-        err.message || "Erro ao fazer login. Verifique suas credenciais."
+        err.message || 'Erro ao fazer login. Verifique suas credenciais.'
       );
     } finally {
       setLoading(false);
@@ -37,15 +37,15 @@ export default function LoginPage() {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter" && !loading) {
+    if (e.key === 'Enter' && !loading) {
       handleLogin();
     }
   };
 
   return (
     <AuthLayout>
-      <AlertBox type={error ? "error" : "success"}>
-        {error || "Para continuar, efetue o login ou registre-se"}
+      <AlertBox type={error ? 'error' : 'success'}>
+        {error || 'Para continuar, efetue o login ou registre-se'}
       </AlertBox>
 
       <AuthSubtitle>Faça login para continuar</AuthSubtitle>
@@ -81,11 +81,11 @@ export default function LoginPage() {
       </div>
 
       <AuthButton onClick={handleLogin} disabled={loading}>
-        {loading ? "Entrando..." : "Entrar"}
+        {loading ? 'Entrando...' : 'Entrar'}
       </AuthButton>
 
       <p className="text-gray-400 text-sm text-center mt-6">
-        Não possui cadastro?{" "}
+        Não possui cadastro?{' '}
         <a
           href="/auth/register/form"
           className="text-gray-600 hover:text-gray-800"

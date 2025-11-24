@@ -1,12 +1,12 @@
-const API_BASE_URL = "https://agente-ia-squad42.onrender.com";
+const API_BASE_URL = 'https://agente-ia-squad42.onrender.com';
 
 // Função para pegar token do localStorage
 function getToken() {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem('token');
   if (!token) {
     // Redireciona para login se não há token
-    window.location.href = "/auth/login";
-    throw new Error("Token não encontrado. Faça login novamente.");
+    window.location.href = '/auth/login';
+    throw new Error('Token não encontrado. Faça login novamente.');
   }
   return token;
 }
@@ -18,9 +18,9 @@ async function handleResponse(res) {
 
     // Se erro 401 (não autorizado), fazer logout automático
     if (res.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/auth/login";
-      throw new Error("Sessão expirada. Faça login novamente.");
+      localStorage.removeItem('token');
+      window.location.href = '/auth/login';
+      throw new Error('Sessão expirada. Faça login novamente.');
     }
 
     throw new Error(`Erro ${res.status}: ${text || res.statusText}`);
@@ -39,7 +39,7 @@ async function handleLoginResponse(res) {
 
     // Para login, não redirecionar - apenas lançar erro
     if (res.status === 401) {
-      throw new Error("Email ou senha incorretos.");
+      throw new Error('Email ou senha incorretos.');
     }
 
     throw new Error(`Erro ${res.status}: ${text || res.statusText}`);
@@ -65,10 +65,10 @@ async function fetchWithToken(url, options = {}) {
 export const api = {
   /** Login */
   login: async (email, password) => {
-    if (!email || !password) throw new Error("Email e senha são obrigatórios.");
+    if (!email || !password) throw new Error('Email e senha são obrigatórios.');
     const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
 
@@ -76,9 +76,9 @@ export const api = {
     const data = await handleLoginResponse(res);
 
     if (data.access_token) {
-      localStorage.setItem("token", data.access_token);
+      localStorage.setItem('token', data.access_token);
     } else {
-      throw new Error("Token não retornado pelo servidor.");
+      throw new Error('Token não retornado pelo servidor.');
     }
 
     return data;
@@ -87,12 +87,12 @@ export const api = {
   /** Registro */
   register: async (name, email, password) => {
     if (!name || !email || !password) {
-      throw new Error("Nome completo, email e senha são obrigatórios.");
+      throw new Error('Nome completo, email e senha são obrigatórios.');
     }
 
     const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password }),
     });
 
@@ -101,8 +101,8 @@ export const api = {
 
   /** Logout */
   logout: () => {
-    localStorage.removeItem("token");
-    window.location.href = "/auth/login";
+    localStorage.removeItem('token');
+    window.location.href = '/auth/login';
   },
 
   /*informações do user*/
@@ -117,7 +117,7 @@ export const api = {
   },
 
   getConversationHistory: async (conversationId) => {
-    if (!conversationId) throw new Error("ID da conversa é obrigatório.");
+    if (!conversationId) throw new Error('ID da conversa é obrigatório.');
     return fetchWithToken(
       `${API_BASE_URL}/api/chat/conversations/${conversationId}`
     );
@@ -125,50 +125,53 @@ export const api = {
 
   renameConversation: async (conversationId, newTitle) => {
     if (!conversationId || !newTitle)
-      throw new Error("ID e título são obrigatórios");
+      throw new Error('ID e título são obrigatórios');
 
     const url = `${API_BASE_URL}/api/chat/conversations/${conversationId}/rename`;
 
     return fetchWithToken(url, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ new_title: newTitle }),
     });
   },
 
   deleteConversation: async (conversationId) => {
-    if (!conversationId) throw new Error("ID da conversa obrigatório");
+    if (!conversationId) throw new Error('ID da conversa obrigatório');
     return fetchWithToken(
       `${API_BASE_URL}/api/chat/conversations/${conversationId}`,
       {
-        method: "DELETE",
+        method: 'DELETE',
       }
     );
   },
-  
+
   initConversation: async () => {
-  try {
-    const token = localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem('token');
 
-    const response = await fetch(`${API_BASE_URL}/api/chat/conversations/init`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      const response = await fetch(
+        `${API_BASE_URL}/api/chat/conversations/init`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Erro ao iniciar conversa");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao iniciar conversa');
+      }
+
+      return await response.json();
+    } catch (err) {
+      console.error('Erro na initConversation:', err);
+      throw err;
     }
-
-    return await response.json();
-  } catch (err) {
-    console.error("Erro na initConversation:", err);
-    throw err;
-  }
-},
+  },
 
   /** Fiz uma logica para enviar a mensagem o documento e o template */
 
@@ -178,7 +181,7 @@ export const api = {
     attachedDocumentId = null,
     templateId = null // Mantido para compatibilidade, mas não usado
   ) => {
-    if (!prompt) throw new Error("Mensagem não pode ser vazia.");
+    if (!prompt) throw new Error('Mensagem não pode ser vazia.');
     const url = `${API_BASE_URL}/api/chat/conversations`;
 
     const requestBody = {
@@ -193,8 +196,8 @@ export const api = {
     // template_id removido - backend identifica template pelo nome no prompt
 
     const data = await fetchWithToken(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody),
     });
 
@@ -212,17 +215,17 @@ export const api = {
 
   /** rotas dos documentos */
   uploadDocument: async (file) => {
-    if (!file) throw new Error("Arquivo não selecionado.");
+    if (!file) throw new Error('Arquivo não selecionado.');
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file);
     return fetchWithToken(`${API_BASE_URL}/api/documents/upload`, {
-      method: "POST",
+      method: 'POST',
       body: formData,
     });
   },
 
   downloadDocumentById: async (documentId) => {
-    if (!documentId) throw new Error("ID do documento é obrigatório.");
+    if (!documentId) throw new Error('ID do documento é obrigatório.');
     const token = getToken();
 
     const res = await fetch(
@@ -243,7 +246,7 @@ export const api = {
   },
 
   getDocumentMetadata: async (documentId) => {
-    if (!documentId) throw new Error("ID do documento é obrigatório.");
+    if (!documentId) throw new Error('ID do documento é obrigatório.');
     const token = getToken();
 
     const res = await fetch(

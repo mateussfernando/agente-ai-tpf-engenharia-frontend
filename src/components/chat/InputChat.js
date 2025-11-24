@@ -81,7 +81,11 @@ export default function InputChat({
         setMessage(''); // Limpar input
 
         const result = await ensureConversation(finalPrompt);
-        conversationId = result.conversation?._id || result.conversation?.id;
+        if (result.conversation) {
+          conversationId = result.conversation._id || result.conversation.id;
+        } else {
+          conversationId = null;
+        }
         responseData = result.response;
       }
 

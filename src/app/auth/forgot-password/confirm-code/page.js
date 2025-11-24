@@ -1,7 +1,7 @@
-"use client";
-import AuthLayout from "@/components/layout/AuthLayout.js";
-import AuthButton from "@/components/ui/AuthButton.js";
-import AuthSubtitle from "@/components/ui/AuthSubtitle.js";
+'use client';
+import AuthLayout from '@/components/auth/AuthLayout.js';
+import AuthButton from '@/components/auth/AuthButton.js';
+import AuthSubtitle from '@/components/auth/AuthSubtitle.js';
 
 export default function ConfirmCode() {
   return (
@@ -23,7 +23,7 @@ export default function ConfirmCode() {
       </div>
 
       <AuthButton
-        onClick={() => (window.location.href = "/auth/forgot-password/success")}
+        onClick={() => (window.location.href = '/auth/forgot-password/success')}
       >
         Confirmar
       </AuthButton>

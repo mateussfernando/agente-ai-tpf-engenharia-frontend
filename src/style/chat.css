@@ -90,11 +90,18 @@ body {
   color: #000000;
   border: none;
   outline: none;
-  margin-bottom: -19px;
+  /* remover margin negativa que causava overflow visual */
+  margin-bottom: 0;
+  /* permitir que o textarea encolha dentro do flex container */
+  min-width: 0;
   font-size: 16px;
-  padding: 5px;
+  /* preenchimento maior para centralizar placeholder verticalmente */
+  padding: 8px 10px;
   background: white;
-
+  height: 40px;
+  resize: none;
+  box-sizing: border-box;
+  line-height: 20px;
 }
 
 .add-file-btn {

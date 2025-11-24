@@ -1,24 +1,24 @@
-"use client";
-import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
-import Modal from "@/components/modals/Modal";
-import SidebarItem from "@/components/chat/SidebarItem";
-import DocumentLink from "@/components/chat/DocumentLink";
-import EnhancedAddFileModal from "@/components/modals/EnhancedAddFileModal";
-import MenuPerfil from "@/components/layout/MenuPerfil";
-import InputChat from "@/components/chat/InputChat";
-import { FaUserCircle } from "react-icons/fa";
-import { api } from "@/api/Api";
-import "@/style/chat.css";
-import "@/style/sidebar.css";
+'use client';
+import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
+import Modal from '@/components/modals/Modal';
+import SidebarItem from '@/components/chat/SidebarItem';
+import DocumentLink from '@/components/chat/DocumentLink';
+import EnhancedAddFileModal from '@/components/modals/EnhancedAddFileModal';
+import MenuPerfil from '@/components/layout/MenuPerfil';
+import InputChat from '@/components/chat/InputChat';
+import { FaUserCircle } from 'react-icons/fa';
+import { api } from '@/api/Api';
+import '@/style/chat.css';
+import '@/style/sidebar.css';
 
 export default function ChatPage() {
   const [conversations, setConversations] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [user, setUser] = useState({
-    name: "Carregando...",
-    email: "carregando@email.com",
+    name: 'Carregando...',
+    email: 'carregando@email.com',
   });
   const [modal, setModal] = useState(null);
   const [showMenuPerfil, setShowMenuPerfil] = useState(false);
@@ -29,9 +29,8 @@ export default function ChatPage() {
   const [attachedTemplates, setAttachedTemplates] = useState([]); // Array de {id, name, instructions}
   const [isLoadingConversation, setIsLoadingConversation] = useState(true);
 
-
   // Estado para a mensagem atual do input
-  const [currentMessage, setCurrentMessage] = useState("");
+  const [currentMessage, setCurrentMessage] = useState('');
 
   // Manter compatibilidade com código existente (pega o primeiro ou null)
   const attachedDocumentId =
@@ -42,7 +41,7 @@ export default function ChatPage() {
     attachedTemplates.length > 0 ? attachedTemplates[0].id : null;
   const hiddenTemplateInstructions = attachedTemplates
     .map((t) => t.instructions)
-    .join(". ");
+    .join('. ');
 
   const chatContainerRef = useRef(null);
 
@@ -50,7 +49,7 @@ export default function ChatPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
         if (!token) return;
 
         const [convData, userData] = await Promise.all([
@@ -61,7 +60,7 @@ export default function ChatPage() {
         setUser({ name: userData.name, email: userData.email });
         setConversations(convData);
 
-        const lastId = localStorage.getItem("lastConversationId");
+        const lastId = localStorage.getItem('lastConversationId');
         if (lastId) {
           const lastConv = convData.find((c) => c._id === lastId);
 
@@ -69,9 +68,8 @@ export default function ChatPage() {
             await selectConversation(lastConv, true); // <- NOVO
           }
         }
-
       } catch (err) {
-        console.error("Erro ao carregar chat:", err.message);
+        console.error('Erro ao carregar chat:', err.message);
       } finally {
         setIsLoadingConversation(false); // <- desbloqueia UI
       }
@@ -91,14 +89,14 @@ export default function ChatPage() {
     setIsLoadingConversation(true); // inicia loading
 
     localStorage.setItem(
-      "lastConversationId",
+      'lastConversationId',
       conversation._id || conversation.id
     );
 
     setActiveConversation(conversation);
     setAttachedFiles([]);
     setAttachedTemplates([]);
-    setCurrentMessage("");
+    setCurrentMessage('');
 
     try {
       const history = await api.getConversationHistory(
@@ -113,13 +111,12 @@ export default function ChatPage() {
     setIsLoadingConversation(false); // encerra loading
   };
 
-
   async function ensureConversation() {
     return activeConversation;
   }
   // Funções de renomear e excluir
   const handleRenameConversation = async (conversationId, newTitle) => {
-    if (!conversationId || !newTitle) return alert("Título obrigatório");
+    if (!conversationId || !newTitle) return alert('Título obrigatório');
 
     try {
       await api.renameConversation(conversationId, newTitle);
@@ -130,12 +127,12 @@ export default function ChatPage() {
       );
       closeModal();
     } catch (err) {
-      alert("Erro ao renomear: " + err.message);
+      alert('Erro ao renomear: ' + err.message);
     }
   };
 
   const handleDeleteConversation = async (conversationId) => {
-    if (!conversationId) return alert("ID da conversa não encontrado");
+    if (!conversationId) return alert('ID da conversa não encontrado');
 
     try {
       await api.deleteConversation(conversationId);
@@ -149,17 +146,20 @@ export default function ChatPage() {
       }
       closeModal();
     } catch (err) {
-      alert("Erro ao excluir: " + err.message);
+      alert('Erro ao excluir: ' + err.message);
     }
   };
 
   const handleNewMessage = async (msg) => {
-    console.log("Mensagem recebida:", msg); // Para debug
+    console.log('Mensagem recebida:', msg); // Para debug
     setMessages((prev) => [...prev, msg]);
 
     // Se for uma mensagem do bot e há uma conversa ativa, recarregar o histórico
-    if (msg.role === "assistant" || msg.sender === "bot") {
-      const convId = activeConversation?._id || activeConversation?.id || msg.conversation_id;
+    if (msg.role === 'assistant' || msg.sender === 'bot') {
+      const convId =
+        activeConversation?._id ||
+        activeConversation?.id ||
+        msg.conversation_id;
       if (!convId) return; // ainda não tem conversa ativa
 
       try {
@@ -169,22 +169,21 @@ export default function ChatPage() {
 
           const updatedConversations = await api.getConversations();
           setConversations(updatedConversations);
-
         }, 1000);
       } catch (err) {
-        console.error("Erro ao recarregar histórico:", err);
+        console.error('Erro ao recarregar histórico:', err);
       }
     }
   };
   const closeModal = () => setModal(null);
-  const onLogout = () => (window.location.href = "/auth/login");
+  const onLogout = () => (window.location.href = '/auth/login');
 
   // Função avançada para formatar mensagens da IA
   const formatMessageContent = (content) => {
     if (!content) return null;
 
     // Dividir por linhas para processar cada uma
-    const lines = content.split("\n");
+    const lines = content.split('\n');
 
     return lines.map((line, lineIndex) => {
       const trimmedLine = line.trim();
@@ -195,7 +194,7 @@ export default function ChatPage() {
       }
 
       // Detectar títulos (linha que termina com :)
-      if (trimmedLine.endsWith(":") && !trimmedLine.includes("**")) {
+      if (trimmedLine.endsWith(':') && !trimmedLine.includes('**')) {
         return (
           <div key={lineIndex} className="message-title">
             {processInlineFormatting(trimmedLine)}
@@ -205,8 +204,8 @@ export default function ChatPage() {
 
       // Detectar títulos entre **
       if (
-        trimmedLine.startsWith("**") &&
-        trimmedLine.endsWith("**") &&
+        trimmedLine.startsWith('**') &&
+        trimmedLine.endsWith('**') &&
         trimmedLine.length > 4
       ) {
         const titleText = trimmedLine.slice(2, -2);
@@ -231,7 +230,7 @@ export default function ChatPage() {
 
       // Detectar listas com bullet (* ou -)
       if (trimmedLine.match(/^[*-]\s+/)) {
-        const listText = trimmedLine.replace(/^[*-]\s+/, "");
+        const listText = trimmedLine.replace(/^[*-]\s+/, '');
         return (
           <div key={lineIndex} className="message-list-item">
             <span className="list-bullet">•</span>
@@ -256,7 +255,7 @@ export default function ChatPage() {
     const parts = text.split(/(\*\*.*?\*\*)/g);
 
     return parts.map((part, index) => {
-      if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
         const boldText = part.slice(2, -2);
         return <strong key={index}>{boldText}</strong>;
       }
@@ -289,7 +288,7 @@ export default function ChatPage() {
               instructions: templateInstruction,
             },
           ]);
-          setCurrentMessage(""); // Campo vazio para o usuário digitar
+          setCurrentMessage(''); // Campo vazio para o usuário digitar
         } else {
           // Instruções visíveis normais
           setCurrentMessage(templateInstruction);
@@ -342,8 +341,8 @@ export default function ChatPage() {
     try {
       // Adicionar mensagem do usuário
       const userMessage = {
-        role: "user",
-        sender: "user",
+        role: 'user',
+        sender: 'user',
         content: prompt,
         id: crypto.randomUUID(),
         attachedTemplateId: templateId,
@@ -358,23 +357,23 @@ export default function ChatPage() {
 
       // Adicionar resposta da IA
       const botMessage = {
-        role: "assistant",
-        sender: "bot",
+        role: 'assistant',
+        sender: 'bot',
         content:
           data?.message_content ||
           data?.content ||
-          "Template processado com sucesso!",
+          'Template processado com sucesso!',
         id: crypto.randomUUID(),
         generated_document_id: data?.document_id,
       };
 
       setMessages((prev) => [...prev, botMessage]);
     } catch (err) {
-      console.error("Erro ao processar template:", err);
+      console.error('Erro ao processar template:', err);
       const errorMessage = {
-        role: "assistant",
-        sender: "bot",
-        content: "Erro ao processar o template. Tente novamente.",
+        role: 'assistant',
+        sender: 'bot',
+        content: 'Erro ao processar o template. Tente novamente.',
         id: crypto.randomUUID(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -404,13 +403,11 @@ export default function ChatPage() {
             setMessages([]);
             setAttachedFiles([]);
             setAttachedTemplates([]);
-            setCurrentMessage("");
+            setCurrentMessage('');
 
             const updated = await api.getConversations();
-            setConversations(updated);;
-
+            setConversations(updated);
           }}
-
         >
           + Novo Chat
         </button>
@@ -424,10 +421,10 @@ export default function ChatPage() {
                 key={conv._id}
                 conversation={conv}
                 onRename={(conversation) =>
-                  setModal({ type: "renomear", chat: conversation })
+                  setModal({ type: 'renomear', chat: conversation })
                 }
                 onDelete={(conversation) =>
-                  setModal({ type: "excluir", chat: conversation })
+                  setModal({ type: 'excluir', chat: conversation })
                 }
                 onSelect={selectConversation}
                 isActive={
@@ -455,13 +452,6 @@ export default function ChatPage() {
       <main className="chat-main">
         <div className="chat-messages-wrapper">
           <div className="chat-messages" ref={chatContainerRef}>
-
-            {isLoadingConversation && (
-              <div className="initial-message">
-                <p>Carregando...</p>
-              </div>
-            )}
-
             {!isLoadingConversation &&
               messages.length === 0 &&
               attachedFiles.length === 0 &&
@@ -483,13 +473,13 @@ export default function ChatPage() {
 
               // Define o conteúdo que será exibido (tratando no JSON )
               const displayContent =
-                parsed && parsed.status === "success" && parsed.message
+                parsed && parsed.status === 'success' && parsed.message
                   ? parsed.message
                   : msg.content;
 
               // Aplicar formatação apenas para mensagens da IA
               const formattedContent =
-                msg.role === "assistant" || msg.sender === "bot"
+                msg.role === 'assistant' || msg.sender === 'bot'
                   ? formatMessageContent(displayContent)
                   : displayContent;
 
@@ -502,15 +492,16 @@ export default function ChatPage() {
               return (
                 <div
                   key={msg._id || msg.id}
-                  className={`message-bubble ${msg.role === "user" || msg.sender === "user"
-                    ? "user"
-                    : "bot"
-                    }`}
+                  className={`message-bubble ${
+                    msg.role === 'user' || msg.sender === 'user'
+                      ? 'user'
+                      : 'bot'
+                  }`}
                 >
                   <div className="message-content">{formattedContent}</div>
 
                   {/* Exibe botão de download apenas se ouver o id do documento */}
-                  {msg.role !== "user" && documentId && (
+                  {msg.role !== 'user' && documentId && (
                     <div className="document-download-container">
                       <DocumentLink documentId={documentId} />
                     </div>
@@ -520,11 +511,11 @@ export default function ChatPage() {
             })}
           </div>
         </div>
-
         <InputChat
           activeConversation={activeConversation}
           ensureConversation={ensureConversation}
-          onMessageSent={handleNewMessage} onOpenAddFileModal={() => setShowAddFileModal(true)}
+          onMessageSent={handleNewMessage}
+          onOpenAddFileModal={() => setShowAddFileModal(true)}
           attachedDocumentId={attachedDocumentId}
           setAttachedDocumentId={(id) => {
             if (id === null) setAttachedFiles([]);
@@ -534,7 +525,9 @@ export default function ChatPage() {
           attachedFiles={attachedFiles}
           onRemoveTemplate={handleRemoveTemplate}
           onRemoveFile={handleRemoveFile}
-          onClearAllAttachments={handleClearAllAttachments} /> </main>
+          onClearAllAttachments={handleClearAllAttachments}
+        />{' '}
+      </main>
 
       {/* Modais */}
       {modal && modal.chat && (
@@ -543,7 +536,7 @@ export default function ChatPage() {
           chatTitle={modal.chat.title}
           onClose={closeModal}
           onConfirm={
-            modal.type === "renomear"
+            modal.type === 'renomear'
               ? (newTitle) => handleRenameConversation(modal.chat._id, newTitle)
               : () => handleDeleteConversation(modal.chat._id)
           }

@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   MdOutlineClose,
   MdDriveFolderUpload,
   MdDescription,
   MdAutoFixHigh,
-} from "react-icons/md";
-import { api } from "../../api/Api";
-import instructions from "../../utils/Instructions";
-import "../../style/add-file.css";
+} from 'react-icons/md';
+import { api } from '../../api/Api';
+import instructions from '../../utils/Instructions';
+import '../../style/add-file.css';
 
 export default function EnhancedAddFileModal({
   onFileUploaded,
   onClose,
   activeConversation,
 }) {
-  const [mode, setMode] = useState("upload"); // "upload" ou "template"
+  const [mode, setMode] = useState('upload'); // "upload" ou "template"
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -27,30 +27,31 @@ export default function EnhancedAddFileModal({
 
   // Obter instruções do arquivo centralizado
   const getHiddenInstructions = (template) => {
-    // Se o template trouxer um tipo explícito (ex: template.type), usar.
-    // Caso contrário, usar a instrução de leitura padrão 'pdf'.
+    // Usa o nome do template para gerar a instrução personalizada
     const type =
-      (template && (template.type || template.instructionType)) || "pdf";
-
+      (template && (template.type || template.instructionType)) || 'pdf';
     const categoryMap = {
-      pdf: "documentTemplates",
-      technicalAnalysis: "documentTemplates",
-      executiveSummary: "documentTemplates",
-      dataExtraction: "documentTemplates",
-      toPdf: "conversionInstructions",
-      toDocx: "conversionInstructions",
-      toExcel: "conversionInstructions",
+      pdf: 'documentTemplates',
+      technicalAnalysis: 'documentTemplates',
+      executiveSummary: 'documentTemplates',
+      dataExtraction: 'documentTemplates',
+      toPdf: 'conversionInstructions',
+      toDocx: 'conversionInstructions',
+      toExcel: 'conversionInstructions',
     };
-
-    const category = categoryMap[type] || "documentTemplates";
-    const instruction = instructions.getInstruction(category, type);
-
+    const category = categoryMap[type] || 'documentTemplates';
+    // Passa o nome do template para a função
+    const instruction = instructions.getInstruction(
+      category,
+      type,
+      template?.filename
+    );
     return instruction;
   };
 
   // Carregar templates ao abrir o modal
   useEffect(() => {
-    if (mode === "template") {
+    if (mode === 'template') {
       loadTemplates();
     }
   }, [mode]);
@@ -61,8 +62,8 @@ export default function EnhancedAddFileModal({
       const templatesData = await api.getTemplates();
       setTemplates(templatesData || []);
     } catch (err) {
-      console.error("Erro ao carregar templates:", err);
-      setError("Erro ao carregar templates disponíveis.");
+      console.error('Erro ao carregar templates:', err);
+      setError('Erro ao carregar templates disponíveis.');
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +71,7 @@ export default function EnhancedAddFileModal({
 
   async function handleFileUpload(file) {
     if (!file || !activeConversation) {
-      setError("Selecione um arquivo e verifique a conversa ativa.");
+      setError('Selecione um arquivo e verifique a conversa ativa.');
       return;
     }
 
@@ -82,7 +83,7 @@ export default function EnhancedAddFileModal({
       const documentId = data?.document?._id || data?._id;
 
       if (!documentId) {
-        throw new Error("ID do documento não recebido da API.");
+        throw new Error('ID do documento não recebido da API.');
       }
 
       setUploadedFile({
@@ -97,8 +98,8 @@ export default function EnhancedAddFileModal({
 
       onClose();
     } catch (err) {
-      console.error("Erro no upload do arquivo:", err);
-      setError(err.message || "Erro ao enviar arquivo.");
+      console.error('Erro no upload do arquivo:', err);
+      setError(err.message || 'Erro ao enviar arquivo.');
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +119,7 @@ export default function EnhancedAddFileModal({
 
   function handleUseTemplate() {
     if (!selectedTemplate) {
-      setError("Selecione um template.");
+      setError('Selecione um template.');
       return;
     }
 
@@ -156,21 +157,21 @@ export default function EnhancedAddFileModal({
           {/* Seletor de modo */}
           <div className="mode-selector">
             <button
-              className={`mode-btn ${mode === "upload" ? "active" : ""}`}
-              onClick={() => setMode("upload")}
+              className={`mode-btn ${mode === 'upload' ? 'active' : ''}`}
+              onClick={() => setMode('upload')}
             >
               <MdDriveFolderUpload /> Upload de Arquivo
             </button>
             <button
-              className={`mode-btn ${mode === "template" ? "active" : ""}`}
-              onClick={() => setMode("template")}
+              className={`mode-btn ${mode === 'template' ? 'active' : ''}`}
+              onClick={() => setMode('template')}
             >
               <MdAutoFixHigh /> Usar Template
             </button>
           </div>
 
           {/* Modo Upload */}
-          {mode === "upload" && (
+          {mode === 'upload' && (
             <div className="upload-section">
               <p className="modal-description">
                 Faça upload do arquivo que você deseja enviar (DOC, DOCX, XLSX,
@@ -178,15 +179,15 @@ export default function EnhancedAddFileModal({
               </p>
 
               <label
-                className={`file-upload-label ${isLoading ? "disabled" : ""}`}
+                className={`file-upload-label ${isLoading ? 'disabled' : ''}`}
               >
                 <MdDriveFolderUpload className="upload-icon" />
-                <span>{isLoading ? "Enviando..." : "Escolher Arquivo"}</span>
+                <span>{isLoading ? 'Enviando...' : 'Escolher Arquivo'}</span>
                 <input
                   type="file"
                   onChange={handleFileChange}
                   disabled={isLoading}
-                  style={{ display: "none" }}
+                  style={{ display: 'none' }}
                   accept=".doc,.docx,.xlsx,.xls,.pdf,.txt"
                 />
               </label>
@@ -203,7 +204,7 @@ export default function EnhancedAddFileModal({
                   <div className="file-details">
                     <span className="file-name">{uploadedFile.name}</span>
                     <span className="file-status">
-                      {" "}
+                      {' '}
                       ✓ Arquivo enviado com sucesso
                     </span>
                   </div>
@@ -213,7 +214,7 @@ export default function EnhancedAddFileModal({
           )}
 
           {/* Modo Template */}
-          {mode === "template" && (
+          {mode === 'template' && (
             <div className="template-section">
               {/* <p className="modal-description">
                 Selecione um template e escolha o tipo de documento. A instrução
@@ -235,8 +236,8 @@ export default function EnhancedAddFileModal({
                         key={template._id}
                         className={`template-item ${
                           selectedTemplate?._id === template._id
-                            ? "selected"
-                            : ""
+                            ? 'selected'
+                            : ''
                         }`}
                         onClick={() => handleTemplateSelect(template)}
                       >
@@ -255,9 +256,8 @@ export default function EnhancedAddFileModal({
                 <div className="template-actions">
                   <div className="template-action-info">
                     <small>
-                      O arquivo será preparado para leitura (tipo definido
-                      pelo template). Adicione suas instruções específicas no
-                      chat.
+                      O arquivo será preparado para leitura (tipo definido pelo
+                      template). Adicione suas instruções específicas no chat.
                     </small>
                   </div>
                   <button

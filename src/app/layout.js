@@ -1,4 +1,3 @@
-// filepath: /home/emiefi/github/agente-ai-tpf-engenharia-frontend/src/app/layout.js
 import { Geist, Geist_Mono, Nunito } from "next/font/google";
 import "./globals.css";
 

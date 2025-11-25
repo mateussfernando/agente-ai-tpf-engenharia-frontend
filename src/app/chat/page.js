@@ -46,37 +46,46 @@ export default function ChatPage() {
   const chatContainerRef = useRef(null);
 
   // Carrega conversas e usuário ao abrir
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
+ useEffect(() => {
+  const load = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-        const [convData, userData] = await Promise.all([
-          api.getConversations(),
-          api.getProfile(),
-        ]);
+      const [convData, userData] = await Promise.all([
+        api.getConversations(),
+        api.getProfile(),
+      ]);
 
-        setUser({ name: userData.name, email: userData.email });
-        setConversations(convData);
+      setUser({ name: userData.name, email: userData.email });
+      setConversations(convData);
 
-        const lastId = localStorage.getItem('lastConversationId');
-        if (lastId) {
-          const lastConv = convData.find((c) => c._id === lastId);
+      // Recupera a última conversa
+      const lastId = localStorage.getItem("lastConversationId");
 
-          if (lastConv) {
-            await selectConversation(lastConv, true); // <- NOVO
-          }
+      if (lastId) {
+        const lastConv = convData.find((c) => c._id === lastId);
+
+        if (lastConv) {
+          await selectConversation(lastConv, true);
+          return; 
         }
-      } catch (err) {
-        console.error('Erro ao carregar chat:', err.message);
-      } finally {
-        setIsLoadingConversation(false); // <- desbloqueia UI
       }
-    };
 
-    load();
-  }, []);
+      // Se NÃO encontrou última conversa → seleciona a primeira
+      if (convData.length > 0) {
+        await selectConversation(convData[0], true);
+      }
+
+    } catch (err) {
+      console.error("Erro ao carregar chat:", err.message);
+    } finally {
+      setIsLoadingConversation(false);
+    }
+  };
+
+  load();
+}, []);
 
   useEffect(() => {
     if (chatContainerRef.current)
@@ -85,31 +94,44 @@ export default function ChatPage() {
   }, [messages]);
 
   // Função para selecionar uma conversa
-  const selectConversation = async (conversation) => {
-    setIsLoadingConversation(true); // inicia loading
+  useEffect(() => {
+    if (chatContainerRef.current)
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+  }, [messages]);
 
-    localStorage.setItem(
-      'lastConversationId',
+  
+  // Função para selecionar uma conversa
+  const selectConversation = async (conversation, isAuto = false) => {
+  if (!conversation) {
+    setActiveConversation(null);
+    setMessages([]);
+    return;
+  }
+
+  setIsLoadingConversation(true);
+
+  localStorage.setItem(
+    "lastConversationId",
+    conversation._id || conversation.id
+  );
+
+  setActiveConversation(conversation);
+  setAttachedFiles([]);
+  setAttachedTemplates([]);
+  setCurrentMessage("");
+
+  try {
+    const history = await api.getConversationHistory(
       conversation._id || conversation.id
     );
+    setMessages(history || []);
+  } catch {
+    setMessages([]);
+  }
 
-    setActiveConversation(conversation);
-    setAttachedFiles([]);
-    setAttachedTemplates([]);
-    setCurrentMessage('');
-
-    try {
-      const history = await api.getConversationHistory(
-        conversation._id || conversation.id
-      );
-
-      setMessages(history || []);
-    } catch {
-      setMessages([]);
-    }
-
-    setIsLoadingConversation(false); // encerra loading
-  };
+  setIsLoadingConversation(false);
+};
 
   async function ensureConversation() {
     return activeConversation;
@@ -169,12 +191,14 @@ export default function ChatPage() {
 
           const updatedConversations = await api.getConversations();
           setConversations(updatedConversations);
+
         }, 1000);
       } catch (err) {
-        console.error('Erro ao recarregar histórico:', err);
+        console.error("Erro ao recarregar histórico:", err);
       }
     }
   };
+
   const closeModal = () => setModal(null);
   const onLogout = () => (window.location.href = '/auth/login');
 
@@ -403,11 +427,13 @@ export default function ChatPage() {
             setMessages([]);
             setAttachedFiles([]);
             setAttachedTemplates([]);
-            setCurrentMessage('');
+            setCurrentMessage("");
 
             const updated = await api.getConversations();
-            setConversations(updated);
+            setConversations(updated);;
+
           }}
+
         >
           + Novo Chat
         </button>
@@ -465,7 +491,14 @@ export default function ChatPage() {
       <main className="chat-main">
         <div className="chat-messages-wrapper">
           <div className="chat-messages" ref={chatContainerRef}>
-            {!isLoadingConversation &&
+
+          {isLoadingConversation && (
+              <div className="initial-message">
+                <p>Carregando...</p>
+              </div>
+            )}
+
+           {!isLoadingConversation &&
               messages.length === 0 &&
               attachedFiles.length === 0 &&
               attachedTemplates.length === 0 && (

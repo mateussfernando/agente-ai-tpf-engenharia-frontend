@@ -133,9 +133,33 @@ export default function ChatPage() {
   setIsLoadingConversation(false);
 };
 
-  async function ensureConversation() {
-    return activeConversation;
+async function ensureConversation(initialPrompt) {
+  try {
+    const draft = await api.initConversation();
+
+    const newConv = {
+      _id: draft.conversation_id,
+      id: draft.conversation_id
+    };
+
+    setActiveConversation(newConv);
+
+    const response = await api.sendMessage(
+      initialPrompt || "Olá!",
+      newConv._id
+    );
+
+    return {
+      conversation: newConv,
+      response
+    };
+
+  } catch (err) {
+    console.error("Erro ao garantir conversa:", err);
+    return { conversation: null, response: null };
   }
+}
+
   // Funções de renomear e excluir
   const handleRenameConversation = async (conversationId, newTitle) => {
     if (!conversationId || !newTitle) return alert('Título obrigatório');

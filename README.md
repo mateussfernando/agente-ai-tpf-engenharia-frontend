@@ -99,5 +99,5 @@ npm run dev
 
 ```
 ## A aplicação será iniciada em
-👉 http://localhost:5173/
+👉  http://localhost:3000
 

@@ -77,14 +77,15 @@ Clique em Download ZIP:
 
 ```No seu ambiente
 # 1. Extraia o arquivo
-Após extrai o arquivo, abra o arquivo no VS Code 
+Após extrai o arquivo, abra o arquivo no VS Code
 
 # 2. Acessar a pasta do projeto
+No terminal do VS Code, execute o seguinte comando para acessar a pasta do projeto:
 cd agente-ai-tpf-engenharia-frontend
 ```
 
 ## Instalando Dependências
-Após acessar a pasta do projeto, rode o seguinte comando no terminal do VScode
+Após acessar a pasta do projeto, rode o seguinte comando no terminal do VScode:
 
 ```
 npm install

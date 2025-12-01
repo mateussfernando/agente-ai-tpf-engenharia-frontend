@@ -81,7 +81,7 @@ Após extrai o arquivo, abra o arquivo no VS Code
 
 # 2. Acessar a pasta do projeto
 No terminal do VS Code, execute o seguinte comando para acessar a pasta do projeto:
-cd agente-ai-tpf-engenharia-frontend
+cd agente-ai-tpf-engenharia-frontend-main
 ```
 
 ## Instalando Dependências

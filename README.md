@@ -74,13 +74,15 @@ npm run dev
 
 1. Certifique-se de que o Node.js está instalado
 
-```No seu terminal do VS Code ou no seu CMD execute para verificar se tem o Node.js, na sua maquina.
+```
+No seu terminal do VS Code ou no seu CMD execute para verificar se tem o Node.js, na sua maquina.
 # node -v
 # npm -v
 ```
 
-Para começar, baixer o arquivo zip, no GitHub, clique no botão Code, selecione a opção local
-Clique em Download ZIP:
+- Para começar, baixer o arquivo zip. 
+- No GitHub, clique no botão Code, selecione a opção local
+- Clique em Download ZIP:
 
 ```No seu ambiente
 # 1. Extraia o arquivo

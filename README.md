@@ -69,3 +69,34 @@ Para iniciar o projeto em modo de desenvolvimento, utilize o seguinte comando:
 npm run dev
 
 ```
+
+### 2º Forma de rota o projeto localmente
+
+Para começar, baixer o arquivo zip, no GitHub, clique no botão Code
+Clique em Download ZIP:
+
+```No seu ambiente
+# 1. Extraia o arquivo
+Após extrai o arquivo, abra o arquivo no VS Code 
+
+# 2. Acessar a pasta do projeto
+cd agente-ai-tpf-engenharia-frontend
+```
+
+## Instalando Dependências
+Após acessar a pasta do projeto, rode o seguinte comando no terminal do VScode
+
+```
+npm install
+
+```
+
+## Executando a Aplicação
+Para iniciar o projeto em modo de desenvolvimento, utilize o seguinte comando:
+```
+npm run dev
+
+```
+## A aplicação será iniciada em
+👉 http://localhost:5173/
+

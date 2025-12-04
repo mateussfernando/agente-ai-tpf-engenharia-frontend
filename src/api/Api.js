@@ -1,4 +1,6 @@
-const API_BASE_URL = 'https://agente-ia-squad42.onrender.com';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  'https://agente-ia-squad42.onrender.com';
 
 // Função para pegar token do localStorage
 function getToken() {
